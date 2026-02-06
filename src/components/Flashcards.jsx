@@ -1,0 +1,537 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { StudyAideIcon } from '../utils/studyAideIcons';
+import {
+  getCardsForCourse,
+  shuffleCards,
+  getStudyAgainPersisted,
+  addToStudyAgainPersisted,
+  removeFromStudyAgainPersisted,
+  clearStudyAgainPersisted,
+  getShowTermFirstPersisted,
+  setShowTermFirstPersisted,
+} from '../data/flashcards';
+import { recordStudied, advanceInterval, getDueForReview } from '../services/spacedReview';
+import { recordStudyActivity } from '../utils/studyStats';
+
+/**
+ * Flashcards - Core study flow: flip, rate (Got it / Study again), progress, review missed, session summary.
+ * Options: which side first (term vs definition).
+ */
+const courseKey = (course) => (course?.id ?? 'all');
+
+export function Flashcards({ course, onExit }) {
+  const [cards, setCards] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showTermFirst, setShowTermFirst] = useState(() => getShowTermFirstPersisted());
+  const [studyAgainIds, setStudyAgainIds] = useState(new Set());
+  const [totalRated, setTotalRated] = useState(0);
+  const [roundComplete, setRoundComplete] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [persistedStudyAgainCount, setPersistedStudyAgainCount] = useState(0);
+  const rateHandlerRef = useRef(() => {});
+  const cardButtonRef = useRef(null);
+  const gotItButtonRef = useRef(null);
+
+  const key = courseKey(course);
+
+  /** Card IDs due for spaced review (this course or all). */
+  const dueEntries = React.useMemo(
+    () => getDueForReview(course?.id ?? undefined, 'flashcards'),
+    [course?.id]
+  );
+  const dueCardIds = React.useMemo(
+    () => dueEntries.map((d) => d.conceptId),
+    [dueEntries]
+  );
+  const isShowingDueDeck =
+    cards.length > 0 &&
+    dueCardIds.length > 0 &&
+    cards.every((c) => dueCardIds.includes(c.id)) &&
+    cards.length === dueCardIds.length;
+
+  const loadDeck = useCallback(
+    (cardIds = null) => {
+      let deck = getCardsForCourse(course);
+      if (cardIds && cardIds.length > 0) {
+        const idSet = new Set(cardIds);
+        deck = deck.filter((c) => idSet.has(c.id));
+        setStudyAgainIds(new Set());
+        removeFromStudyAgainPersisted(key, cardIds);
+      } else {
+        setStudyAgainIds(new Set());
+      }
+      setTotalRated(0);
+      const shuffled = shuffleCards(deck);
+      setCards(shuffled);
+      setIndex(0);
+      setIsFlipped(false);
+      setRoundComplete(false);
+      setShowSummary(false);
+      setPersistedStudyAgainCount(getStudyAgainPersisted(key).length);
+    },
+    [course, key]
+  );
+
+  useEffect(() => {
+    loadDeck();
+  }, [loadDeck]);
+
+  useEffect(() => {
+    setPersistedStudyAgainCount(getStudyAgainPersisted(key).length);
+  }, [key]);
+
+  const currentCard = cards[index];
+  const hasPrev = index > 0;
+  const hasNext = index < cards.length - 1;
+  const isLastCard = index === cards.length - 1;
+  const courseLabel = course?.code || 'All Courses';
+  const courseColor = course?.color || '#9333ea';
+
+  const handleRate = (again) => {
+    if (!currentCard) return;
+    const cid = currentCard.courseId || course?.id;
+    if (cid) {
+      recordStudied(cid, currentCard.id, 'flashcards');
+      if (!again) advanceInterval(cid, currentCard.id, 'flashcards');
+      if (again) addToStudyAgainPersisted(key, currentCard.id);
+    }
+    setTotalRated((n) => n + 1);
+    if (again) setStudyAgainIds((prev) => new Set(prev).add(currentCard.id));
+    if (isLastCard) {
+      setRoundComplete(true);
+    } else {
+      setIndex((i) => i + 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleExitClick = () => {
+    setShowSummary(true);
+  };
+
+  const handleDone = () => {
+    onExit();
+  };
+
+  const handleReviewAgain = () => {
+    const againCards = cards.filter((c) => studyAgainIds.has(c.id));
+    if (againCards.length === 0) {
+      onExit();
+      return;
+    }
+    removeFromStudyAgainPersisted(key, againCards.map((c) => c.id));
+    loadDeck(againCards.map((c) => c.id));
+  };
+
+  const handleStartWithPersisted = () => {
+    const ids = getStudyAgainPersisted(key);
+    if (ids.length === 0) return;
+    clearStudyAgainPersisted(key);
+    setPersistedStudyAgainCount(0);
+    loadDeck(ids);
+  };
+
+  const handleStudyDueFirst = () => {
+    if (dueCardIds.length === 0) return;
+    loadDeck(dueCardIds);
+  };
+
+  rateHandlerRef.current = handleRate;
+
+  const progressPct = cards.length ? ((index + 1) / cards.length) * 100 : 0;
+
+  // Keyboard: Space/Enter flip; 1/G Got it, 2/S Study again (when flipped); Left/Right prev/next
+  useEffect(() => {
+    if (showSummary || roundComplete || cards.length === 0) return;
+    const onKeyDown = (e) => {
+      const target = e.target;
+      if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') return;
+      if (isFlipped && (e.key === '1' || e.key === 'g' || e.key === 'G')) {
+        e.preventDefault();
+        rateHandlerRef.current(false);
+        return;
+      }
+      if (isFlipped && (e.key === '2' || e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        rateHandlerRef.current(true);
+        return;
+      }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setIsFlipped((f) => !f);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (hasPrev) {
+          setIndex((i) => i - 1);
+          setIsFlipped(false);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (hasNext) {
+          setIndex((i) => i + 1);
+          setIsFlipped(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showSummary, roundComplete, cards.length, hasPrev, hasNext, isFlipped]);
+
+  // Escape key exits study mode (always registered)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onExit();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onExit]);
+
+  // Record study activity for streak when session ends (summary or round complete)
+  useEffect(() => {
+    if ((showSummary || roundComplete) && cards.length > 0) {
+      recordStudyActivity();
+    }
+  }, [showSummary, roundComplete, cards.length]);
+
+  // Accessibility: focus card or rate button when index/flip changes
+  useEffect(() => {
+    if (showSummary || roundComplete || cards.length === 0) return;
+    const t = setTimeout(() => {
+      if (isFlipped) gotItButtonRef.current?.focus();
+      else cardButtonRef.current?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [index, isFlipped, showSummary, roundComplete, cards.length]);
+
+  // Swipe: left = next, right = prev (touch only)
+  const [touchStartX, setTouchStartX] = useState(null);
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  const handleTouchEnd = (e) => {
+    if (touchStartX == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const minSwipe = 50;
+    if (dx < -minSwipe && hasNext) {
+      setIndex((i) => i + 1);
+      setIsFlipped(false);
+    } else if (dx > minSwipe && hasPrev) {
+      setIndex((i) => i - 1);
+      setIsFlipped(false);
+    }
+    setTouchStartX(null);
+  };
+
+  // Empty deck
+  if (cards.length === 0 && !showSummary) {
+    return (
+      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <p className="text-gray-500 mb-1">No flashcards for this course yet.</p>
+        <p className="text-sm text-gray-400 mb-2">Pick another course or try Quick Review for all decks.</p>
+        <p className="text-xs text-gray-400">Use the bar above to switch mode or back to course.</p>
+      </div>
+    );
+  }
+
+  // Session summary (after Exit or round complete)
+  if (showSummary || (roundComplete && cards.length > 0)) {
+    const toReview = studyAgainIds.size;
+    return (
+      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Session summary</h2>
+        <p className="text-gray-600">
+          You reviewed <strong>{cards.length}</strong> card{cards.length !== 1 ? 's' : ''}.
+        </p>
+        {toReview > 0 && (
+          <>
+            <p className="text-gray-600 mt-1">
+              <strong>{toReview}</strong> need more practice.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Review these again soon to remember them better.</p>
+          </>
+        )}
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          {toReview > 0 && (
+            <button
+              type="button"
+              onClick={handleReviewAgain}
+              className="px-5 py-2.5 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors"
+            >
+              Review {toReview} again
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleDone}
+            className="px-5 py-2.5 bg-gray-100 text-gray-800 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+          >
+            Back to course
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 mt-3">Use the bar above to switch mode or back to course.</p>
+      </div>
+    );
+  }
+
+  // Main study view
+  const displayFront = showTermFirst ? currentCard.front : currentCard.back;
+  const displayBack = showTermFirst ? currentCard.back : currentCard.front;
+  const frontLabel = showTermFirst ? 'Term' : 'Definition';
+  const backLabel = showTermFirst ? 'Definition' : 'Term';
+  const currentVisibleText = isFlipped ? displayBack : displayFront;
+
+  const handleReadAloud = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis || !currentVisibleText) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(currentVisibleText);
+    window.speechSynthesis.speak(u);
+  };
+  const canReadAloud = typeof window !== 'undefined' && !!window.speechSynthesis;
+
+  return (
+    <div className="fade-in space-y-6">
+      {/* Header — mode title only; options in menu */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <StudyAideIcon aideId="flashcards" className="w-8 h-8 text-gray-700 shrink-0" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Flashcards</h1>
+            <p className="text-sm text-gray-500">{courseLabel}</p>
+          </div>
+        </div>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOptionsOpen((o) => !o)}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            aria-label="Flashcard options"
+            aria-expanded={optionsOpen}
+            aria-haspopup="true"
+          >
+            <span className="text-lg leading-none" aria-hidden>⋮</span>
+          </button>
+          {optionsOpen && (
+            <>
+              <div className="fixed inset-0 z-10" aria-hidden onClick={() => setOptionsOpen(false)} />
+              <div className="absolute right-0 top-full mt-1 z-20 min-w-[200px] py-1 bg-white rounded-xl border border-gray-200 shadow-lg">
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Show first</p>
+                  <div className="mt-1 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setShowTermFirst(true); setShowTermFirstPersisted(true); setIsFlipped(false); setOptionsOpen(false); }}
+                      className={`px-2 py-1 rounded text-sm ${showTermFirst ? 'bg-brand-100 text-brand-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      Term
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowTermFirst(false); setShowTermFirstPersisted(false); setIsFlipped(false); setOptionsOpen(false); }}
+                      className={`px-2 py-1 rounded text-sm ${!showTermFirst ? 'bg-brand-100 text-brand-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      Definition
+                    </button>
+                  </div>
+                </div>
+                {dueCardIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { handleStudyDueFirst(); setOptionsOpen(false); }}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Study due first ({dueCardIds.length})
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { loadDeck(); setOptionsOpen(false); }}
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Shuffle deck
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { handleExitClick(); setOptionsOpen(false); }}
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-100"
+                >
+                  End & see summary
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Due for review: study due cards first */}
+      {dueCardIds.length > 0 && !isShowingDueDeck && (
+        <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-sm text-blue-800">
+            You have <strong>{dueCardIds.length}</strong> card{dueCardIds.length !== 1 ? 's' : ''} due for review.
+          </p>
+          <button
+            type="button"
+            onClick={handleStudyDueFirst}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-200 text-blue-900 hover:bg-blue-300 transition-colors"
+          >
+            Study due first
+          </button>
+        </div>
+      )}
+
+      {/* Persisted "study again" from last time */}
+      {persistedStudyAgainCount > 0 && (
+        <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-sm text-amber-800">
+            You have <strong>{persistedStudyAgainCount}</strong> card{persistedStudyAgainCount !== 1 ? 's' : ''} to review from last time.
+          </p>
+          <button
+            type="button"
+            onClick={handleStartWithPersisted}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-200 text-amber-900 hover:bg-amber-300 transition-colors"
+          >
+            Start with these
+          </button>
+        </div>
+      )}
+
+      {/* Progress bar + in-session tally */}
+      <div>
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Card {index + 1} of {cards.length}
+        </div>
+        <div className="flex justify-between text-sm text-gray-500 mb-1">
+          <span>Card {index + 1} of {cards.length}</span>
+          {currentCard?.topic && (
+            <span className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">{currentCard.topic}</span>
+          )}
+        </div>
+        {totalRated > 0 && (
+          <div className="flex gap-4 text-sm mb-2">
+            <span className="text-green-600">Got it: {totalRated - studyAgainIds.size}</span>
+            <span className="text-amber-600">Study again: {studyAgainIds.size}</span>
+          </div>
+        )}
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-brand-500 rounded-full transition-all duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Card (3D flip) — tap to flip, swipe left/right for next/prev on touch */}
+      <div
+        className="flashcard-container touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <button
+          ref={cardButtonRef}
+          type="button"
+          onClick={() => setIsFlipped((f) => !f)}
+          className="w-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 rounded-2xl"
+          aria-label={isFlipped ? `Show ${frontLabel}` : `Show ${backLabel}`}
+        >
+          <div className={`flashcard-inner ${isFlipped ? 'flipped' : ''}`}>
+            <div
+              className="flashcard-face rounded-2xl shadow-sm hover:border-gray-200 transition-colors"
+              style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
+            >
+              <p className="text-sm text-gray-400 mb-2">{frontLabel}</p>
+              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
+                {displayFront}
+              </p>
+              <p className="text-sm text-brand-600 mt-4">Tap to flip</p>
+            </div>
+            <div
+              className="flashcard-face back rounded-2xl shadow-sm hover:border-gray-200 transition-colors"
+              style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
+            >
+              <p className="text-sm text-gray-400 mb-2">{backLabel}</p>
+              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
+                {displayBack}
+              </p>
+              <p className="text-sm text-brand-600 mt-4">Tap to flip</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Read aloud — outside card, reads current side */}
+      {canReadAloud && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={handleReadAloud}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            aria-label="Read aloud"
+          >
+            <span className="text-base" aria-hidden>🔊</span>
+            Listen
+          </button>
+        </div>
+      )}
+
+      {/* Rate (only when flipped) */}
+      {isFlipped && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-3 justify-center">
+            <button
+              ref={gotItButtonRef}
+              type="button"
+              onClick={() => handleRate(false)}
+              className="px-5 py-2.5 bg-green-100 text-green-800 rounded-xl font-medium hover:bg-green-200 transition-colors"
+            >
+              Got it
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRate(true)}
+              className="px-5 py-2.5 bg-amber-100 text-amber-800 rounded-xl font-medium hover:bg-amber-200 transition-colors"
+            >
+              Study again
+            </button>
+          </div>
+          <p className="text-xs text-gray-400">Press <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">1</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">G</kbd> for Got it, <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">2</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">S</kbd> for Study again</p>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => {
+            setIndex((i) => Math.max(0, i - 1));
+            setIsFlipped(false);
+          }}
+          disabled={!hasPrev}
+          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
+        >
+          ← Previous
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIndex((i) => Math.min(cards.length - 1, i + 1));
+            setIsFlipped(false);
+          }}
+          disabled={!hasNext}
+          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-brand-600 text-white hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-500"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default Flashcards;

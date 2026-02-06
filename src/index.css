@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sidebar-width: 16rem;
+}
+
+body {
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1); }
+  100% { transform: scale(0.95); }
+}
+
+@keyframes narrative-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.ring-pulse {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+/* Picmonic image generating loader */
+@keyframes loader-draw {
+  0% { stroke-dashoffset: 120; opacity: 0.6; }
+  50% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: -120; opacity: 0.6; }
+}
+
+@keyframes loader-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.02); }
+}
+
+@keyframes loader-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes loader-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.image-generating-loader__path {
+  stroke-dasharray: 120;
+  animation: loader-draw 2.5s ease-in-out infinite;
+}
+
+.image-generating-loader__shape {
+  animation: loader-float 3s ease-in-out infinite;
+}
+
+.image-generating-loader__shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: loader-shimmer 1.8s ease-in-out infinite;
+}
+
+.image-generating-loader__dot {
+  animation: loader-dot 1.4s ease-in-out infinite both;
+}
+.image-generating-loader__dot:nth-child(2) { animation-delay: 0.2s; }
+.image-generating-loader__dot:nth-child(3) { animation-delay: 0.4s; }
+.image-generating-loader__dot:nth-child(4) { animation-delay: 0.6s; }
+.image-generating-loader__dot:nth-child(5) { animation-delay: 0.8s; }
+
+/* Activity Ring SVG rotation */
+.activity-ring {
+  transform: rotate(-90deg);
+}
+
+/* Flashcard flip */
+.flashcard-container {
+  perspective: 1000px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.flashcard-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid #f3f4f6;
+  background: white;
+  text-align: center;
+}
+
+.flashcard-face.back {
+  transform: rotateY(180deg);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Safe area for bottom nav (Phase 6.7) */
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Phase 6.6 Motion */
+
+/* View Transitions API — cross-fade for route changes */
+::view-transition-old(root) {
+  animation: view-transition-fade-out 0.15s ease-out both;
+}
+::view-transition-new(root) {
+  animation: view-transition-fade-in 0.2s ease-in both;
+}
+@keyframes view-transition-fade-out {
+  to { opacity: 0; }
+}
+@keyframes view-transition-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Staggered list reveals — use .stagger-children on parent, children get delay */
+.stagger-children > * {
+  animation: stagger-fade-in 0.35s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.04s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.06s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.08s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.14s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.16s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.2s; }
+@keyframes stagger-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Micro-interaction — button press feedback (6.6.3) */
+.btn-press {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* Reduced motion (6.6.4) — disable or shorten animations */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .stagger-children > *,
+  [class*="animate-"] {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .btn-press:active {
+    transform: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.01ms !important;
+  }
+}
