@@ -230,10 +230,10 @@ export function Flashcards({ course, onExit }) {
   // Empty deck
   if (cards.length === 0 && !showSummary) {
     return (
-      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8 text-center">
-        <p className="text-gray-500 mb-1">No flashcards for this course yet.</p>
-        <p className="text-sm text-gray-400 mb-2">Pick another course or try Quick Review for all decks.</p>
-        <p className="text-xs text-gray-400">Use the bar above to switch mode or back to course.</p>
+      <div className="fade-in bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center">
+        <p className="text-gray-500 dark:text-gray-400 mb-1">No flashcards for this course yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Pick another course or try Quick Review for all decks.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">Use the bar above to switch mode or back to course.</p>
       </div>
     );
   }
@@ -242,17 +242,17 @@ export function Flashcards({ course, onExit }) {
   if (showSummary || (roundComplete && cards.length > 0)) {
     const toReview = studyAgainIds.size;
     return (
-      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8 text-center">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Session summary</h2>
-        <p className="text-gray-600">
+      <div className="fade-in bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Session summary</h2>
+        <p className="text-gray-600 dark:text-gray-300">
           You reviewed <strong>{cards.length}</strong> card{cards.length !== 1 ? 's' : ''}.
         </p>
         {toReview > 0 && (
           <>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               <strong>{toReview}</strong> need more practice.
             </p>
-            <p className="text-sm text-gray-500 mt-2">Review these again soon to remember them better.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Review these again soon to remember them better.</p>
           </>
         )}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
@@ -268,12 +268,13 @@ export function Flashcards({ course, onExit }) {
           <button
             type="button"
             onClick={handleDone}
-            className="px-5 py-2.5 bg-gray-100 text-gray-800 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+            className="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            aria-label="Done, back to course"
           >
-            Back to course
+            Done
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-3">Use the bar above to switch mode or back to course.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Use the bar above to switch mode or back to course.</p>
       </div>
     );
   }
@@ -298,17 +299,17 @@ export function Flashcards({ course, onExit }) {
       {/* Header — mode title only; options in menu */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <StudyAideIcon aideId="flashcards" className="w-8 h-8 text-gray-700 shrink-0" />
+          <StudyAideIcon aideId="flashcards" className="w-8 h-8 text-gray-700 dark:text-gray-300 shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Flashcards</h1>
-            <p className="text-sm text-gray-500">{courseLabel}</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Flashcards</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{courseLabel}</p>
           </div>
         </div>
         <div className="relative">
           <button
             type="button"
             onClick={() => setOptionsOpen((o) => !o)}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
             aria-label="Flashcard options"
             aria-expanded={optionsOpen}
             aria-haspopup="true"
@@ -318,21 +319,21 @@ export function Flashcards({ course, onExit }) {
           {optionsOpen && (
             <>
               <div className="fixed inset-0 z-10" aria-hidden onClick={() => setOptionsOpen(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 min-w-[200px] py-1 bg-white rounded-xl border border-gray-200 shadow-lg">
-                <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Show first</p>
+              <div className="absolute right-0 top-full mt-1 z-20 min-w-[200px] py-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg">
+                <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Show first</p>
                   <div className="mt-1 flex gap-2">
                     <button
                       type="button"
                       onClick={() => { setShowTermFirst(true); setShowTermFirstPersisted(true); setIsFlipped(false); setOptionsOpen(false); }}
-                      className={`px-2 py-1 rounded text-sm ${showTermFirst ? 'bg-brand-100 text-brand-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                      className={`px-2 py-1 rounded text-sm ${showTermFirst ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       Term
                     </button>
                     <button
                       type="button"
                       onClick={() => { setShowTermFirst(false); setShowTermFirstPersisted(false); setIsFlipped(false); setOptionsOpen(false); }}
-                      className={`px-2 py-1 rounded text-sm ${!showTermFirst ? 'bg-brand-100 text-brand-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                      className={`px-2 py-1 rounded text-sm ${!showTermFirst ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       Definition
                     </button>
@@ -342,7 +343,7 @@ export function Flashcards({ course, onExit }) {
                   <button
                     type="button"
                     onClick={() => { handleStudyDueFirst(); setOptionsOpen(false); }}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Study due first ({dueCardIds.length})
                   </button>
@@ -350,14 +351,14 @@ export function Flashcards({ course, onExit }) {
                 <button
                   type="button"
                   onClick={() => { loadDeck(); setOptionsOpen(false); }}
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Shuffle deck
                 </button>
                 <button
                   type="button"
                   onClick={() => { handleExitClick(); setOptionsOpen(false); }}
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-100"
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700"
                 >
                   End & see summary
                 </button>
@@ -369,14 +370,14 @@ export function Flashcards({ course, onExit }) {
 
       {/* Due for review: study due cards first */}
       {dueCardIds.length > 0 && !isShowingDueDeck && (
-        <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-2 flex items-center justify-between gap-3">
-          <p className="text-sm text-blue-800">
+        <div className="rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
             You have <strong>{dueCardIds.length}</strong> card{dueCardIds.length !== 1 ? 's' : ''} due for review.
           </p>
           <button
             type="button"
             onClick={handleStudyDueFirst}
-            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-200 text-blue-900 hover:bg-blue-300 transition-colors"
+            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors"
           >
             Study due first
           </button>
@@ -385,14 +386,14 @@ export function Flashcards({ course, onExit }) {
 
       {/* Persisted "study again" from last time */}
       {persistedStudyAgainCount > 0 && (
-        <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-2 flex items-center justify-between gap-3">
-          <p className="text-sm text-amber-800">
+        <div className="rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
             You have <strong>{persistedStudyAgainCount}</strong> card{persistedStudyAgainCount !== 1 ? 's' : ''} to review from last time.
           </p>
           <button
             type="button"
             onClick={handleStartWithPersisted}
-            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-200 text-amber-900 hover:bg-amber-300 transition-colors"
+            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 hover:bg-amber-300 dark:hover:bg-amber-700 transition-colors"
           >
             Start with these
           </button>
@@ -408,19 +409,19 @@ export function Flashcards({ course, onExit }) {
         >
           Card {index + 1} of {cards.length}
         </div>
-        <div className="flex justify-between text-sm text-gray-500 mb-1">
+        <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
           <span>Card {index + 1} of {cards.length}</span>
           {currentCard?.topic && (
-            <span className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">{currentCard.topic}</span>
+            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">{currentCard.topic}</span>
           )}
         </div>
         {totalRated > 0 && (
           <div className="flex gap-4 text-sm mb-2">
-            <span className="text-green-600">Got it: {totalRated - studyAgainIds.size}</span>
-            <span className="text-amber-600">Study again: {studyAgainIds.size}</span>
+            <span className="text-green-600 dark:text-green-400">Got it: {totalRated - studyAgainIds.size}</span>
+            <span className="text-amber-600 dark:text-amber-400">Study again: {studyAgainIds.size}</span>
           </div>
         )}
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-brand-500 rounded-full transition-all duration-300"
             style={{ width: `${progressPct}%` }}
@@ -443,24 +444,24 @@ export function Flashcards({ course, onExit }) {
         >
           <div className={`flashcard-inner ${isFlipped ? 'flipped' : ''}`}>
             <div
-              className="flashcard-face rounded-2xl shadow-sm hover:border-gray-200 transition-colors"
+              className="flashcard-face rounded-2xl shadow-sm hover:border-gray-200 dark:hover:border-gray-500 transition-colors"
               style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
             >
-              <p className="text-sm text-gray-400 mb-2">{frontLabel}</p>
-              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{frontLabel}</p>
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed px-2">
                 {displayFront}
               </p>
-              <p className="text-sm text-brand-600 mt-4">Tap to flip</p>
+              <p className="text-sm text-brand-600 dark:text-brand-400 mt-4">Tap to flip</p>
             </div>
             <div
-              className="flashcard-face back rounded-2xl shadow-sm hover:border-gray-200 transition-colors"
+              className="flashcard-face back rounded-2xl shadow-sm hover:border-gray-200 dark:hover:border-gray-500 transition-colors"
               style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
             >
-              <p className="text-sm text-gray-400 mb-2">{backLabel}</p>
-              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{backLabel}</p>
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed px-2">
                 {displayBack}
               </p>
-              <p className="text-sm text-brand-600 mt-4">Tap to flip</p>
+              <p className="text-sm text-brand-600 dark:text-brand-400 mt-4">Tap to flip</p>
             </div>
           </div>
         </button>
@@ -472,7 +473,7 @@ export function Flashcards({ course, onExit }) {
           <button
             type="button"
             onClick={handleReadAloud}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             aria-label="Read aloud"
           >
             <span className="text-base" aria-hidden>🔊</span>
@@ -489,19 +490,19 @@ export function Flashcards({ course, onExit }) {
               ref={gotItButtonRef}
               type="button"
               onClick={() => handleRate(false)}
-              className="px-5 py-2.5 bg-green-100 text-green-800 rounded-xl font-medium hover:bg-green-200 transition-colors"
+              className="px-5 py-2.5 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-xl font-medium hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors"
             >
               Got it
             </button>
             <button
               type="button"
               onClick={() => handleRate(true)}
-              className="px-5 py-2.5 bg-amber-100 text-amber-800 rounded-xl font-medium hover:bg-amber-200 transition-colors"
+              className="px-5 py-2.5 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-xl font-medium hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors"
             >
               Study again
             </button>
           </div>
-          <p className="text-xs text-gray-400">Press <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">1</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">G</kbd> for Got it, <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">2</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 font-mono text-[10px]">S</kbd> for Study again</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Press <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">1</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">G</kbd> for Got it, <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">2</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">S</kbd> for Study again</p>
         </div>
       )}
 
@@ -514,7 +515,7 @@ export function Flashcards({ course, onExit }) {
             setIsFlipped(false);
           }}
           disabled={!hasPrev}
-          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
+          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:hover:bg-gray-100 dark:disabled:hover:bg-gray-700"
         >
           ← Previous
         </button>
@@ -525,7 +526,7 @@ export function Flashcards({ course, onExit }) {
             setIsFlipped(false);
           }}
           disabled={!hasNext}
-          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-brand-600 text-white hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-500"
+          className="px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-brand-600 text-white hover:bg-brand-700 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
         >
           Next →
         </button>

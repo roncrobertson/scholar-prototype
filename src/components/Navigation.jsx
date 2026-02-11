@@ -40,7 +40,7 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
   const width = collapsed ? 'w-20' : 'w-64';
 
   return (
-    <nav className={`fixed left-0 top-0 bottom-0 ${width} bg-white/95 backdrop-blur-sm border-r border-gray-100 shadow-sm flex flex-col p-4 z-40 transition-all duration-200`}>
+    <nav className={`fixed left-0 top-0 bottom-0 ${width} bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-r border-gray-100 dark:border-gray-700 shadow-sm flex flex-col p-4 z-40 transition-all duration-200`}>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-2 mb-8 ${collapsed ? 'justify-center' : ''}`}>
         <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shrink-0">
@@ -48,8 +48,8 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h1 className="font-bold text-gray-900">Scholar</h1>
-            <p className="text-xs text-gray-500">Academic Coach</p>
+            <h1 className="font-bold text-gray-900 dark:text-gray-100">Scholar</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Academic Coach</p>
           </div>
         )}
       </div>
@@ -62,8 +62,8 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
             onClick={() => onNavigate(item.id)}
             className={`btn-press w-full flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl transition-colors text-left
               ${screen === item.id && !selectedCourse 
-                ? 'bg-brand-50 text-brand-700' 
-                : 'text-gray-600 hover:bg-gray-50'}`}
+                ? 'bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' 
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             title={collapsed ? item.label : undefined}
             aria-label={item.label}
           >
@@ -73,16 +73,16 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
         ))}
 
         {/* Courses Section */}
-        <div className="pt-4 mt-4 border-t border-gray-100">
-          {!collapsed && <p className="px-3 text-xs text-gray-400 uppercase tracking-wider mb-2">Courses</p>}
+        <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-700">
+          {!collapsed && <p className="px-3 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Courses</p>}
           {courses.map(course => (
             <button
               key={course.id}
               onClick={() => onSelectCourse(course)}
               className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-xl transition-colors text-left
                 ${selectedCourse?.id === course.id 
-                  ? 'bg-brand-50 text-brand-700' 
-                  : 'text-gray-600 hover:bg-gray-50'}`}
+                  ? 'bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
               title={collapsed ? `${course.code}: ${course.name}` : undefined}
               aria-label={`${course.code}: ${course.name}`}
             >
@@ -93,7 +93,7 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
               {!collapsed && (
                 <>
                   <span className="text-sm">{course.code}</span>
-                  <span className="ml-auto text-xs text-gray-400">{course.grade}%</span>
+                  <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">{course.grade}%</span>
                 </>
               )}
             </button>
@@ -101,25 +101,25 @@ export function DesktopNav({ screen, selectedCourse, onNavigate, onSelectCourse 
         </div>
       </div>
 
-      {/* Collapse toggle + User Profile */}
-      <div className="border-t border-gray-100 pt-4 space-y-4">
+      {/* Collapse + User Profile */}
+      <div className="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-4">
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors`}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <PanelLeft className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           {!collapsed && <span className="text-sm font-medium">Collapse</span>}
         </button>
         <div className={`flex items-center gap-3 px-2 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
-            <span className="text-brand-700 font-semibold">{student.avatar}</span>
+          <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/50 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-brand-700 dark:text-brand-300 font-semibold">{student.avatar}</span>
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 text-sm truncate">{student.name}</p>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{student.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" aria-hidden />
                 {student.streak} day streak
               </p>
@@ -145,19 +145,19 @@ export function MobileNav({
   return (
     <>
       {/* Top Bar */}
-      <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 z-40 px-4 py-3 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 z-40 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold">S</span>
           </div>
-          <span className="font-bold text-gray-900">Scholar</span>
+          <span className="font-bold text-gray-900 dark:text-gray-100">Scholar</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm flex items-center gap-1">
+          <span className="text-sm flex items-center gap-1 text-gray-600 dark:text-gray-300">
             <Flame className="w-4 h-4 text-amber-500" aria-hidden />
             {student.streak}
           </span>
-          <button onClick={onToggleMenu} className="p-1 rounded-lg hover:bg-gray-100" aria-label={showMenu ? 'Close menu' : 'Open menu'}>
+          <button onClick={onToggleMenu} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" aria-label={showMenu ? 'Close menu' : 'Open menu'}>
             {showMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -167,7 +167,7 @@ export function MobileNav({
       {showMenu && (
         <div className="fixed inset-0 z-30 pt-16 overflow-auto">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onToggleMenu} aria-hidden />
-          <div className="relative bg-white/95 backdrop-blur-md shadow-xl min-h-full">
+          <div className="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-xl min-h-full">
           <div className="p-4 space-y-2">
             {navItems.map(item => (
               <button
@@ -177,13 +177,13 @@ export function MobileNav({
                   onToggleMenu();
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
-                  ${screen === item.id ? 'bg-brand-50 text-brand-700' : 'text-gray-600'}`}
+                  ${screen === item.id ? 'bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 <item.Icon className="w-5 h-5 shrink-0" aria-hidden />
                 <span className="font-medium">{item.label}</span>
               </button>
             ))}
-            <div className="pt-4 border-t border-gray-100 mt-4">
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-700 mt-4">
               {courses.map(course => (
                 <button
                   key={course.id}
@@ -191,7 +191,7 @@ export function MobileNav({
                     onSelectCourse(course);
                     onToggleMenu();
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-900 dark:text-gray-100"
                 >
                   <span 
                     className="w-3 h-3 rounded-full" 
@@ -207,7 +207,7 @@ export function MobileNav({
       )}
 
       {/* Bottom Tab Bar — icon + label per Phase 6.7 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-40 flex justify-around py-2 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-40 flex justify-around py-2 safe-area-pb">
         {[
           { id: 'home', Icon: Home, label: 'Today' },
           { id: 'courses', Icon: BookOpen, label: 'Courses' },
@@ -218,7 +218,7 @@ export function MobileNav({
             key={item.id}
             onClick={() => onNavigate(item.id)}
             className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl min-w-[64px] transition-colors
-              ${screen === item.id ? 'bg-brand-50 text-brand-700' : 'text-gray-500'}`}
+              ${screen === item.id ? 'bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300' : 'text-gray-500 dark:text-gray-400'}`}
             aria-label={item.label}
             aria-current={screen === item.id ? 'page' : undefined}
           >

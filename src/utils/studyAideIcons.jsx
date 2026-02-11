@@ -13,7 +13,6 @@ export const studyAideIconMap = {
   tutor: Bot,
   summary: FileText,
   flashcards: LayoutGrid,
-  picmonics: Palette,
   practice: PenLine,
   podcast: Headphones,
 };

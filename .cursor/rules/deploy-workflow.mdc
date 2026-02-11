@@ -1,0 +1,20 @@
+---
+description: When user says "Commit to git" — stage, commit, push
+alwaysApply: true
+---
+
+# Deploy: Commit to Git
+
+When the user says any of:
+- "Commit to git"
+- "Push to git"
+- "Deploy updates"
+- "Push my changes"
+
+Run these commands in order:
+1. `git add .`
+2. `git status` (to show what will be committed)
+3. `git commit -m "Update prototype"` — or ask for a message if they prefer something specific
+4. `git push origin main`
+
+Vercel auto-deploys on push — no further action needed. Tell the user when the push completes and that the live site will update in 1–2 minutes.

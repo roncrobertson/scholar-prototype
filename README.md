@@ -90,7 +90,7 @@ Core principles:
 
 ## Documentation
 
-Start at **`docs/README.md`** for the doc index. Five primary docs (handoff, roadmap, Picmonic overview, image flow, validation) live in `docs/`; older/reference docs are in `docs/archive/`.
+Start at **`docs/README.md`** for the doc index. Primary docs (handoff, roadmap) live in `docs/`; older/reference docs are in `docs/archive/`.
 
 ## Tech Stack
 

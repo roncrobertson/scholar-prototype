@@ -4,7 +4,6 @@
  */
 
 import { getDueCountFromConcepts } from '../services/spacedReview';
-import { picmonicsBank } from '../data/picmonics';
 import { getFlashcardsBank } from '../data/flashcards';
 import { student } from '../data/student';
 
@@ -53,14 +52,14 @@ export function recordStudyActivity() {
 }
 
 /**
- * Count of unique concepts/cards ever studied (picmonics + flashcards).
+ * Count of unique concepts/cards ever studied (flashcards).
  */
 export function getConceptsStudiedCount() {
   const data = getReviewStorage();
   const seen = new Set();
   for (const key of Object.keys(data)) {
     const [courseId, conceptId, mode] = key.split(':');
-    if (mode === 'picmonics' || mode === 'flashcards') {
+    if (mode === 'flashcards') {
       seen.add(`${courseId}:${conceptId}`);
     }
   }
@@ -68,19 +67,10 @@ export function getConceptsStudiedCount() {
 }
 
 /**
- * Concepts/cards due for review (picmonics + flashcards combined).
+ * Concepts/cards due for review (flashcards).
  */
 export function getDueCount() {
-  const picmonicsDue = getDueCountFromConcepts(picmonicsBank, 'picmonics');
-  const flashcardsDue = getDueCountFromConcepts(getFlashcardsBank(), 'flashcards');
-  return picmonicsDue + flashcardsDue;
-}
-
-/**
- * Picmonics due count (for Home breakdown).
- */
-export function getPicmonicsDueCount() {
-  return getDueCountFromConcepts(picmonicsBank, 'picmonics');
+  return getDueCountFromConcepts(getFlashcardsBank(), 'flashcards');
 }
 
 /**

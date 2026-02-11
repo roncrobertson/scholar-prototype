@@ -14,11 +14,34 @@ const ACTION_RULES =
   'Show a clear cause and effect: something causes something else to happen (e.g. one thing blocks, allows, or transforms another). ' +
   'Each key fact must be visible as an action or event in the scene, not only as a static object. ';
 
+/** Strong action verbs by attribute type for one causal moment (content-agnostic). Used in deriveMinimalSceneFromBlueprint. */
+const VERB_BY_ATTRIBUTE_TYPE = {
+  mechanism: 'acts on',
+  inhibition: 'blocks',
+  synthesis: 'builds',
+  breakdown: 'breaks',
+  structure: 'affects',
+  effect: 'causes',
+  side_effect: 'triggers',
+  spectrum: 'targets',
+  increase: 'amplifies',
+  decrease: 'reduces',
+  resistance: 'resists',
+  exception: 'contrasts with',
+  location: 'sits in',
+  class: 'relates to',
+  enzyme: 'acts on',
+  receptor: 'binds',
+};
+
 const STYLE_PREFIX =
   'One clear main character or focal object in the center. Minimal, uncluttered background. ' +
+  'The main character or focal object should have a clear expression or pose and one or two distinctive visual details (e.g. costume, prop, or gesture) so it is instantly recognizable. ' +
   'High-contrast, vivid digital illustration in a Pixar-style with a touch of whimsy. ' +
   'Exaggerated characters and memorable, slightly surreal—simple and memorable scene. ' +
   'Make the scene slightly absurd or whimsical so it is highly memorable (e.g. exaggerated expressions, unexpected juxtapositions), while keeping the same meaning. ' +
+  'Include one small absurd or humorous detail (e.g. unexpected prop, expression, or juxtaposition) that makes the scene stick in memory, without adding new informational content. ' +
+  'Use size or color to emphasize the most important element (e.g. main character slightly larger or more vivid). ' +
   'A ridiculous or emotionally vivid image is far more memorable than a bland one—push toward absurd, humorous, or striking so it sticks in memory. ' +
   'Wide shot: one main character or object in the foreground, at most 2–3 secondary elements in the background. ' +
   'Concrete, recognizable shapes with strong personality—not a literal diagram or generic lab. ' +
@@ -30,7 +53,7 @@ const STYLE_PREFIX =
 
 /** Reinforced no-text and element-cap rule appended to every prompt. */
 const NO_TEXT_SUFFIX =
-  ' No text, no words, no labels, no numbers, no digits anywhere. Sticky notes, papers, boards, and signs must be completely blank—do not draw any letters or writing on them. Only the elements explicitly described above; no extra objects, crowds, or equipment. Purely visual illustration only.';
+  ' No text, no words, no labels, no numbers, no digits anywhere. No room numbers, no labels on doors, no signs with text—sticky notes, papers, boards, and signs must be completely blank. Every surface must have zero written content. Only the elements explicitly described above; no extra objects, crowds, or equipment. Purely visual illustration only.';
 
 /**
  * Principle-based scope rules (global for all picmonics).
@@ -38,9 +61,9 @@ const NO_TEXT_SUFFIX =
  * DO NOT DRAW: Anything not listed—no extra characters, environments, props, or text.
  */
 const DO_DRAW_RULE =
-  ' Draw only: (1) the main character or anchor, and (2) the 2–4 supporting elements explicitly named in the scene description above. Every visible thing in the image must be one of those; nothing else. ';
+  ' Draw only: (1) the main character or anchor, and (2) the 2–4 supporting elements explicitly named in the scene description above. Every visible thing in the image must be one of those; nothing else. Empty, minimal background—only what is listed. ';
 const DO_NOT_DRAW_RULE =
-  ' Do not draw anything that is not explicitly listed in the scene description. No extra characters or people. No extra environments (e.g. no labs, offices, warehouses, rooms with furniture). No props, furniture, equipment, or decorative objects unless listed. No text, words, letters, numbers, or writing of any kind anywhere in the image. ';
+  ' Do not draw anything that is not explicitly listed in the scene description. No extra characters, people, or figures. No furniture (no tables, chairs, desks, wastebaskets). No extra doors, walls, or rooms beyond what is described. No props, equipment, or decorative objects unless listed. No lab clutter, no office items, no generic room interiors. No text, words, letters, numbers, or writing of any kind anywhere in the image. ';
 
 /** Combined scope rules appended to every prompt (principle-based, not item lists). */
 const SCOPE_SUFFIX = DO_DRAW_RULE + DO_NOT_DRAW_RULE;
@@ -116,6 +139,42 @@ export function getPrimaryFactVisual(artifact) {
 }
 
 /**
+ * Get the primary fact's attribute type (for strong-verb selection). Content-agnostic.
+ * @param {object} artifact - { attributes }
+ * @returns {string|null} Attribute type of primary fact, or null
+ */
+function getPrimaryAttributeType(artifact) {
+  const attrs = artifact?.attributes ?? [];
+  if (!attrs.length) return null;
+  const primaryIndex = attrs.findIndex((a) => a.priority === 'primary');
+  const i = primaryIndex >= 0 ? primaryIndex : 0;
+  const type = (attrs[i].type || '').toLowerCase().replace(/\s+/g, '_');
+  return type || null;
+}
+
+/**
+ * Pick a strong action verb for the causal sentence by attribute type. Content-agnostic.
+ * @param {string|null} attributeType - e.g. "mechanism", "inhibition"
+ * @returns {string} Verb phrase for "The [anchor] [verb] [primary], so [effect]"
+ */
+function getCausalVerb(attributeType) {
+  if (!attributeType) return 'shows or does';
+  const key = attributeType.toLowerCase().replace(/\s+/g, '_');
+  return VERB_BY_ATTRIBUTE_TYPE[key] || 'acts on';
+}
+
+/**
+ * Heuristic: anchor object reads like a character (anthropomorphic). Content-agnostic.
+ * @param {object} anchor - { object?: string }
+ * @returns {boolean}
+ */
+function isAnchorCharacterLike(anchor) {
+  if (!anchor?.object || typeof anchor.object !== 'string') return false;
+  const lower = anchor.object.toLowerCase();
+  return /\b(character|figure|villain|chef|creature|person|animal|being|actor)\b/.test(lower);
+}
+
+/**
  * Get effect-type visual (first in 'right' zone or second slot) for cause→effect sentence.
  * @param {object} artifact - { symbol_map }
  * @returns {string|null}
@@ -184,10 +243,12 @@ export function deriveMinimalSceneFromBlueprint(artifact) {
   const primaryVisual = getPrimaryFactVisual(artifact);
   const effectVisual = getEffectVisual(artifact);
 
-  // Single causal sentence when we have primary + effect: "The [anchor] [does primary], so [effect]."
+  // Single causal sentence with strong verb: "The [anchor] [verb] [primary], so [effect]." Content-agnostic.
   if (primaryVisual && effectVisual && primaryVisual !== effectVisual) {
     const anchorShort = (artifact?.anchor?.object || center).replace(/^(a |an )/i, '').replace(/\.$/, '').trim();
-    const causal = `The ${anchorShort} shows or does ${primaryVisual.toLowerCase()}, so ${effectVisual.toLowerCase()}.`;
+    const primaryType = getPrimaryAttributeType(artifact);
+    const verb = getCausalVerb(primaryType);
+    const causal = `The ${anchorShort} ${verb} ${primaryVisual.toLowerCase()}, so ${effectVisual.toLowerCase()}.`;
     const rest = elements.slice(1, 4).map((e) => e.visual).filter(Boolean);
     const restPhrase = rest.length ? ` Only these elements: ${[center, ...rest].join('; ')}.` : '';
     return `One scene: ${scene_setting}. ${causal}${restPhrase} Minimal background. No split panels.`;
@@ -212,6 +273,11 @@ export function buildScenePrompt(artifact) {
   const suffix = NO_TEXT_SUFFIX;
   const isCharacterizationOnly = artifact.encoding_mode === 'characterization_only';
   const stylePrefix = isCharacterizationOnly ? CHARACTERIZATION_STYLE : STYLE_PREFIX;
+  // Content-agnostic: anthropomorphism hint only when anchor reads as a character (e.g. "evil pencil character")
+  const anthropomorphismLine =
+    !isCharacterizationOnly && isAnchorCharacterLike(artifact.anchor)
+      ? ' The main character should be anthropomorphic: clear face, expression, and at least one distinctive costume or prop so it is memorable and recognizable. '
+      : '';
 
   // Concept-agnostic: layout + distinct-elements clause so DALL·E aligns with hotspot zones and draws distinct elements
   const layoutLine = deriveLayoutLine(artifact);
@@ -238,14 +304,14 @@ export function buildScenePrompt(artifact) {
         : `One exaggerated main character or focal object in the foreground: ${artifact.anchor?.object || 'the subject'}. ${story}`;
     const withPrimary = (scene.replace(/\.\s*$/, '') + '.' + primaryPhrase).trim();
     const minimalConstraint = ' Empty, minimal background—only what is listed in the scene; no extra environments, props, or text.';
-    return stylePrefix + onlyDrawLead + withPrimary + layoutAndDistinct + minimalConstraint + suffix + SCOPE_SUFFIX;
+    return stylePrefix + anthropomorphismLine + onlyDrawLead + withPrimary + layoutAndDistinct + minimalConstraint + suffix + SCOPE_SUFFIX;
   }
   // Fallback: minimal blueprint from anchor + symbol_map
   const useBlueprint = artifact.anchor && (artifact.symbol_map?.length ?? 0) > 0;
   if (useBlueprint) {
     const minimalStory = deriveMinimalSceneFromBlueprint(artifact);
     const sceneDescription = applyPolicy(minimalStory);
-    return stylePrefix + sceneDescription + layoutAndDistinct + suffix + SCOPE_SUFFIX;
+    return stylePrefix + anthropomorphismLine + sceneDescription + layoutAndDistinct + suffix + SCOPE_SUFFIX;
   }
   if (artifact.image_story?.trim()) {
     const raw = artifact.image_story.trim();
@@ -255,11 +321,11 @@ export function buildScenePrompt(artifact) {
         ? story
         : `One exaggerated main character or focal object in the foreground: ${artifact.anchor?.object || 'the subject'}. ${story}`;
     const withPrimary = (scene.replace(/\.\s*$/, '') + '.' + primaryPhrase).trim();
-    return stylePrefix + withPrimary + layoutAndDistinct + suffix + SCOPE_SUFFIX;
+    return stylePrefix + anthropomorphismLine + withPrimary + layoutAndDistinct + suffix + SCOPE_SUFFIX;
   }
   const minimalStory = deriveMinimalSceneFromBlueprint(artifact);
   const sceneDescription = applyPolicy(minimalStory);
-  return stylePrefix + sceneDescription + layoutAndDistinct + suffix + SCOPE_SUFFIX;
+  return stylePrefix + anthropomorphismLine + sceneDescription + layoutAndDistinct + suffix + SCOPE_SUFFIX;
 }
 
 /**
@@ -279,7 +345,11 @@ export async function buildScenePromptWithLLM(artifact) {
   const layoutLine = deriveLayoutLine(artifact);
   const distinctClause = deriveDistinctElementsClause(artifact);
   const layoutAndDistinct = (layoutLine && distinctClause) ? ` ${layoutLine} ${distinctClause}` : '';
-  return STYLE_PREFIX + scene.replace(/\.\s*$/, '') + '.' + layoutAndDistinct + NO_TEXT_SUFFIX + SCOPE_SUFFIX;
+  const anthropomorphismLine =
+    isAnchorCharacterLike(artifact.anchor)
+      ? ' The main character should be anthropomorphic: clear face, expression, and at least one distinctive costume or prop so it is memorable and recognizable. '
+      : '';
+  return STYLE_PREFIX + anthropomorphismLine + scene.replace(/\.\s*$/, '') + '.' + layoutAndDistinct + NO_TEXT_SUFFIX + SCOPE_SUFFIX;
 }
 
 /**

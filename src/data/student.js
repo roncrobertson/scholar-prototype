@@ -8,12 +8,11 @@ export const student = {
   weeklyCompleted: 7
 };
 
-// Study Aides — order: AI Tutor, Smart Notes, Flashcards, Picmonics, Practice, Audio
+// Study Aides — order: AI Tutor, Smart Notes, Flashcards, Practice, Audio
 export const studyAides = [
   { id: 'tutor', name: 'AI Tutor', icon: '🤖', desc: 'Ask anything', color: 'bg-indigo-500' },
   { id: 'summary', name: 'Smart Notes', icon: '📋', desc: 'AI-generated summaries', color: 'bg-amber-500' },
   { id: 'flashcards', name: 'Flashcards', icon: '🎴', desc: 'Spaced repetition cards', color: 'bg-blue-500' },
-  { id: 'picmonics', name: 'Picmonics', icon: '🎨', desc: 'Visual mnemonics', color: 'bg-pink-500' },
   { id: 'practice', name: 'Practice', icon: '📝', desc: 'Practice questions', color: 'bg-green-500' },
   { id: 'podcast', name: 'Audio Review', icon: '🎧', desc: 'Listen while walking', color: 'bg-purple-500' },
 ];

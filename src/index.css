@@ -4,10 +4,16 @@
 
 :root {
   --sidebar-width: 16rem;
+  --bg-page: #f9fafb;
+  --text-primary: #111827;
+  /* Exclude root from view transition so hit-testing works (snapshotted elements skip hit-testing) */
+  view-transition-name: none;
 }
 
 body {
   font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
 }
 
 /* Animations */
@@ -122,7 +128,6 @@ body {
   background: white;
   text-align: center;
 }
-
 .flashcard-face.back {
   transform: rotateY(180deg);
 }
@@ -146,6 +151,15 @@ body {
   background: #9ca3af;
 }
 
+/* Hide scrollbar while keeping scroll (e.g. study mode strip) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Safe area for bottom nav (Phase 6.7) */
 .safe-area-pb {
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
@@ -153,7 +167,12 @@ body {
 
 /* Phase 6.6 Motion */
 
-/* View Transitions API — cross-fade for route changes */
+/* View Transitions API — cross-fade for route changes.
+   pointer-events: none ensures the transition overlay doesn't block clicks
+   (fixes theme toggle and other buttons being unclickable) */
+::view-transition {
+  pointer-events: none;
+}
 ::view-transition-old(root) {
   animation: view-transition-fade-out 0.15s ease-out both;
 }

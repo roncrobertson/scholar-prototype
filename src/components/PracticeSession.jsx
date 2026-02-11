@@ -143,9 +143,9 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
   // No questions
   if (questions.length === 0) {
     return (
-      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8 text-center">
-        <p className="text-gray-500 mb-1">No practice questions for this course yet.</p>
-        <p className="text-sm text-gray-400 mb-2">Pick another course or generate questions with AI.</p>
+      <div className="fade-in bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center">
+        <p className="text-gray-500 dark:text-gray-400 mb-1">No practice questions for this course yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Pick another course or generate questions with AI.</p>
         <button
           type="button"
           onClick={handleGenerateAI}
@@ -154,8 +154,8 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
         >
           {generatingAI ? 'Generating…' : 'Generate 3 questions (AI)'}
         </button>
-        {aiError && <p className="mt-2 text-sm text-red-600">{aiError}</p>}
-        <p className="text-xs text-gray-400 mt-4">Use the bar above to switch mode or back to course.</p>
+        {aiError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{aiError}</p>}
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">Use the bar above to switch mode or back to course.</p>
       </div>
     );
   }
@@ -179,44 +179,44 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
     return (
       <div className="fade-in space-y-6">
         <div className="flex items-center gap-3">
-          <StudyAideIcon aideId="practice" className="w-8 h-8 text-gray-700 shrink-0" />
+          <StudyAideIcon aideId="practice" className="w-8 h-8 text-gray-700 dark:text-gray-300 shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Review missed</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Review missed</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Question {reviewIndex + 1} of {missedItems.length}
             </p>
           </div>
         </div>
         <div
-          className="rounded-2xl border-2 border-amber-200 bg-amber-50/50 p-6 shadow-sm"
+          className="rounded-2xl border-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/30 p-6 shadow-sm"
           style={{ borderTopColor: course?.color || '#10B981', borderTopWidth: 4 }}
         >
-          <p className="text-lg font-medium text-gray-900 leading-relaxed mb-4">{question.prompt}</p>
+          <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed mb-4">{question.prompt}</p>
           {isSA ? (
             <div className="space-y-2 mb-4">
-              <p className="text-sm text-gray-500">Your answer</p>
-              <p className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-gray-800">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Your answer</p>
+              <p className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-gray-800 dark:text-gray-200">
                 {attempt.user_answer || '(empty)'}
               </p>
               {question.correct_keywords?.length > 0 && (
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-green-700 dark:text-green-400">
                   Acceptable keywords: {question.correct_keywords.join(', ')}
                 </p>
               )}
             </div>
           ) : (
             <div className="space-y-2 mb-4">
-              <p className="text-sm text-red-700">Your answer: {question.choices?.find((c) => c.id === attempt.chosen_id)?.text ?? attempt.chosen_id}</p>
+              <p className="text-sm text-red-700 dark:text-red-400">Your answer: {question.choices?.find((c) => c.id === attempt.chosen_id)?.text ?? attempt.chosen_id}</p>
               {correctChoice && (
-                <p className="text-sm text-green-700">Correct: {correctChoice.text}</p>
+                <p className="text-sm text-green-700 dark:text-green-400">Correct: {correctChoice.text}</p>
               )}
             </div>
           )}
-          <div className="rounded-xl p-4 bg-amber-50 border border-amber-200">
-            <p className="text-sm font-medium text-amber-900">Rationale</p>
-            <p className="text-sm text-gray-700 mt-1">{question.rationale}</p>
+          <div className="rounded-xl p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-200">Rationale</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{question.rationale}</p>
             {question.misconception_hint && (
-              <p className="text-sm text-amber-800 mt-2 font-medium">Hint: {question.misconception_hint}</p>
+              <p className="text-sm text-amber-800 dark:text-amber-300 mt-2 font-medium">Hint: {question.misconception_hint}</p>
             )}
           </div>
           <div className="mt-6 flex justify-end">
@@ -237,12 +237,12 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
   if (completed) {
     const wrongCount = questions.length - correctCount;
     return (
-      <div className="fade-in bg-white rounded-2xl border border-gray-100 p-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Session summary</h2>
-        <p className="text-gray-600">
+      <div className="fade-in bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Session summary</h2>
+        <p className="text-gray-600 dark:text-gray-300" role="status" aria-live="polite">
           You got <strong>{correctCount}</strong> of <strong>{questions.length}</strong> correct ({scorePct}%).
         </p>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {sessionSource === 'ai'
             ? `${questions.length} AI-generated question${questions.length !== 1 ? 's' : ''}`
             : `${questions.length} from question bank`}
@@ -250,7 +250,7 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
 
         {wrongCount > 0 && (
           <>
-            <p className="text-sm text-amber-700 mt-3 bg-amber-50 rounded-lg p-3">
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg p-3">
               Review the rationales for the {wrongCount} question{wrongCount !== 1 ? 's' : ''} you missed to strengthen those concepts.
             </p>
             <div className="mt-4">
@@ -265,8 +265,8 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
           </>
         )}
 
-        <div className="mt-6 pt-4 border-t border-gray-100">
-          <p className="text-sm font-medium text-gray-700 mb-3">Next</p>
+        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Next</p>
           <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
             <button
               type="button"
@@ -279,19 +279,19 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
               type="button"
               onClick={handleGenerateAI}
               disabled={generatingAI}
-              className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 disabled:opacity-50 transition-colors text-left text-sm"
+              className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors text-left text-sm"
             >
               {generatingAI ? 'Generating…' : 'Replace with 3 new (AI)'}
             </button>
             <button
               type="button"
               onClick={onExit}
-              className="px-4 py-2.5 bg-gray-50 text-gray-600 rounded-xl font-medium hover:bg-gray-100 transition-colors text-left text-sm"
+              className="px-4 py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left text-sm"
             >
               Exit
             </button>
           </div>
-          <p className="text-xs text-gray-400 mt-3">Use the bar above to switch mode or back to course.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Use the bar above to switch mode or back to course.</p>
         </div>
 
         <p className="text-xs text-gray-400 mt-4">Session {sessionId}</p>
@@ -307,17 +307,17 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
       {/* Header — mode title only; exit is in StudyModeSwitcher */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <StudyAideIcon aideId="practice" className="w-8 h-8 text-gray-700 shrink-0" />
+          <StudyAideIcon aideId="practice" className="w-8 h-8 text-gray-700 dark:text-gray-300 shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Practice</h1>
-            <p className="text-sm text-gray-500">{courseLabel}</p>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Practice</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{courseLabel}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {sessionSource === 'ai'
                 ? `${questions.length} AI-generated question${questions.length !== 1 ? 's' : ''}`
                 : `${questions.length} from question bank`}
             </p>
             {targetConcepts.length > 0 && (
-              <p className="text-sm text-brand-600 mt-0.5">
+              <p className="text-sm text-brand-600 dark:text-brand-400 mt-0.5">
                 This session: {questions.length} questions on {targetConcepts.map(formatConceptName).join(', ')}
               </p>
             )}
@@ -327,7 +327,7 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
           type="button"
           onClick={handleGenerateAI}
           disabled={generatingAI}
-          className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+          className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
           title={questions.length > 0 ? 'Replaces current questions with 3 new AI questions' : undefined}
         >
           {generatingAI ? 'Generating…' : questions.length > 0 ? 'Replace with 3 new (AI)' : 'Generate 3 questions (AI)'}
@@ -336,15 +336,15 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
 
       {/* Progress */}
       <div>
-        <div className="flex justify-between text-sm text-gray-500 mb-1">
+        <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
           <span>Question {index + 1} of {questions.length}</span>
           {currentQuestion?.concept_id && (
-            <span className="px-2 py-0.5 bg-gray-100 rounded text-gray-600 capitalize">
+            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300 capitalize">
               {currentQuestion.concept_id.replace(/-/g, ' ')}
             </span>
           )}
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-300"
             style={{ width: `${progressPct}%`, backgroundColor: courseColor }}
@@ -354,10 +354,10 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
 
       {/* Question card */}
       <div
-        className="rounded-2xl border-2 border-gray-100 bg-white p-6 shadow-sm"
+        className="rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm"
         style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
       >
-        <p className="text-lg font-medium text-gray-900 leading-relaxed mb-6">
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed mb-6">
           {currentQuestion.prompt}
         </p>
 
@@ -365,14 +365,14 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
           <>
             {isShortAnswer ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Your answer</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your answer</label>
                 <input
                   type="text"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleSubmit()}
                   placeholder="Type your answer..."
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-colors"
                   autoFocus
                 />
               </div>
@@ -385,8 +385,8 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
                     onClick={() => setSelectedChoiceId(choice.id)}
                     className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${
                       selectedChoiceId === choice.id
-                        ? 'border-brand-500 bg-brand-50 text-brand-900'
-                        : 'border-gray-100 bg-gray-50 text-gray-800 hover:border-gray-200 hover:bg-gray-100'
+                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/40 text-brand-900 dark:text-brand-100'
+                        : 'border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:border-gray-200 dark:hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600'
                     }`}
                   >
                     <span className="font-medium mr-2">{choice.id.toUpperCase()}.</span>
@@ -410,8 +410,8 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
           <>
             {isShortAnswer ? (
               <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-1">Your answer</p>
-                <p className="px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">{userAnswer || '(empty)'}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Your answer</p>
+                <p className="px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100">{userAnswer || '(empty)'}</p>
               </div>
             ) : (
               <div className="space-y-2 mb-4">
@@ -424,29 +424,29 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
                       key={choice.id}
                       className={`px-4 py-3 rounded-xl border-2 ${
                         isCorrectChoice
-                          ? 'border-green-500 bg-green-50'
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
                           : showWrong
-                          ? 'border-red-300 bg-red-50'
-                          : 'border-gray-100 bg-gray-50'
+                          ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30'
+                          : 'border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700'
                       }`}
                     >
-                      <span className="font-medium mr-2">{choice.id.toUpperCase()}.</span>
+                      <span className="font-medium mr-2 text-gray-900 dark:text-gray-100">{choice.id.toUpperCase()}.</span>
                       {choice.text}
-                      {isCorrectChoice && <span className="ml-2 text-green-700">✓ Correct</span>}
-                      {showWrong && <span className="ml-2 text-red-700">✗ Your answer</span>}
+                      {isCorrectChoice && <span className="ml-2 text-green-700 dark:text-green-400">✓ Correct</span>}
+                      {showWrong && <span className="ml-2 text-red-700 dark:text-red-400">✗ Your answer</span>}
                     </div>
                   );
                 })}
               </div>
             )}
 
-            <div className={`rounded-xl p-4 ${correct ? 'bg-green-50' : 'bg-amber-50'}`}>
-              <p className={`font-medium ${correct ? 'text-green-800' : 'text-amber-900'}`}>
+            <div className={`rounded-xl p-4 ${correct ? 'bg-green-50 dark:bg-green-900/30' : 'bg-amber-50 dark:bg-amber-900/30'}`}>
+              <p className={`font-medium ${correct ? 'text-green-800 dark:text-green-200' : 'text-amber-900 dark:text-amber-200'}`}>
                 {correct ? 'Correct.' : 'Not quite.'}
               </p>
-              <p className="text-sm text-gray-700 mt-1">{currentQuestion.rationale}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{currentQuestion.rationale}</p>
               {!correct && currentQuestion.misconception_hint && (
-                <p className="text-sm text-amber-800 mt-2 font-medium">
+                <p className="text-sm text-amber-800 dark:text-amber-300 mt-2 font-medium">
                   Hint: {currentQuestion.misconception_hint}
                 </p>
               )}
@@ -455,7 +455,7 @@ export function PracticeSession({ course, onExit, sessionOptions = {} }) {
                 const missing = lastAttempt?.grading_result?.missing;
                 if (missing?.length > 0) {
                   return (
-                    <p className="text-sm text-amber-800 mt-2 font-medium">
+                    <p className="text-sm text-amber-800 dark:text-amber-300 mt-2 font-medium">
                       Try to include concepts like: {missing.slice(0, 5).join(', ')}{missing.length > 5 ? '…' : ''}
                     </p>
                   );

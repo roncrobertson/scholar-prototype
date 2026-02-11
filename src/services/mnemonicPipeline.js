@@ -6,6 +6,7 @@
 
 import { getDecomposition } from '../data/conceptDecompositions';
 import { getPhoneticAnchor } from '../data/phoneticAnchors';
+import { generatePhoneticAnchor } from './phoneticAnchorGenerator';
 import { buildSymbolMap } from '../data/visualGrammar';
 import { enrichSymbolMapWithLibrary } from '../data/symbolLibrary';
 import { getSceneSettingForArtifact } from './promptEngineer';
@@ -214,11 +215,16 @@ export async function runPipeline(rawInput, options = {}) {
       };
     });
   }
-  const anchor = anchorOverride && anchorOverride.phrase && anchorOverride.object
-    ? { phrase: anchorOverride.phrase, object: anchorOverride.object }
-    : concept_id
-      ? getPhoneticAnchor(concept_id)
-      : { phrase: concept_title, object: concept_title };
+  let anchor =
+    anchorOverride && anchorOverride.phrase && anchorOverride.object
+      ? { phrase: anchorOverride.phrase, object: anchorOverride.object }
+      : concept_id
+        ? getPhoneticAnchor(concept_id)
+        : null;
+  if (!anchor) {
+    const generated = await generatePhoneticAnchor(concept_title, domain);
+    anchor = generated || { phrase: concept_title, object: concept_title };
+  }
   const symbol_map = enrichSymbolMapWithLibrary(buildSymbolMap(attributes));
   const scene_blueprint = buildSceneBlueprintFromPipeline(anchor, symbol_map, domain);
   const image_story = deriveImageStoryFromBlueprint(scene_blueprint, anchor);

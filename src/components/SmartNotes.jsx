@@ -183,23 +183,23 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
     <div className="fade-in space-y-6">
       {/* Header — mode title only; exit is in StudyModeSwitcher */}
       <div className="flex items-center gap-3">
-        <StudyAideIcon aideId="summary" className="w-8 h-8 text-gray-700 shrink-0" />
+        <StudyAideIcon aideId="summary" className="w-8 h-8 text-gray-700 dark:text-gray-300 shrink-0" />
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Smart Notes</h1>
-          <p className="text-sm text-gray-500">{courseLabel}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Smart Notes</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{courseLabel}</p>
         </div>
       </div>
 
       {/* Topic & context — compact filter row */}
-      <div className="bg-gray-50 rounded-xl border border-gray-100 px-4 py-3">
-        <p className="text-xs font-medium text-gray-500 mb-2">Topic & context</p>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 px-4 py-3">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Topic & context</p>
         <div className="flex flex-wrap gap-3 items-center">
           <label className="flex items-center gap-2">
             <span className="sr-only">Topic</span>
             <select
               value={topicName}
               onChange={(e) => setTopicName(e.target.value)}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-gray-900 bg-white text-sm font-medium shadow-sm focus:ring-2 focus:ring-offset-0 focus:ring-gray-300"
+              className="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 text-sm font-medium shadow-sm focus:ring-2 focus:ring-offset-0 focus:ring-gray-300 dark:focus:ring-gray-600"
               aria-label="Topic"
             >
               {topics.map((t) => {
@@ -219,7 +219,7 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
             <select
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-gray-900 bg-white text-sm font-medium shadow-sm focus:ring-2 focus:ring-offset-0 focus:ring-gray-300"
+              className="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 text-sm font-medium shadow-sm focus:ring-2 focus:ring-offset-0 focus:ring-gray-300 dark:focus:ring-gray-600"
               aria-label="Context"
             >
               {CONTEXTS.map((c) => (
@@ -229,37 +229,37 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
               ))}
             </select>
           </label>
-          <span className="text-xs text-gray-400">Note updates as you change.</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Note updates as you change.</span>
         </div>
       </div>
 
       {/* Smart note card — softer accent, clear hierarchy */}
       {note && (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
           <div className="border-l-4 p-6 pl-6" style={{ borderLeftColor: courseColor }}>
             {/* Badges: commonly tested, flagged, confused */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                 aria-label="Reason this note is shown"
               >
                 <span aria-hidden>✓</span>
                 Commonly tested
               </span>
               {flagged && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200">
                   <span aria-hidden>📌</span> You flagged this for review
                 </span>
               )}
               {confused && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 dark:bg-red-900/40 text-red-800 dark:text-red-200">
                   <span aria-hidden>?</span> You marked this as confusing
                 </span>
               )}
               <button
                 type="button"
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition-colors"
                 aria-label="Copy note"
               >
                 {copied ? 'Copied' : 'Copy note'}
@@ -313,51 +313,51 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
               </div>
             )}
             {aiResult && (
-              <div className="mb-4 p-3 rounded-lg bg-brand-50 border border-brand-200">
+              <div className="mb-4 p-3 rounded-lg bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-800">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <p className="text-xs font-semibold text-brand-800">{aiResult.type === 'bullets' ? 'Summary (AI)' : 'Expanded (AI)'}</p>
+                  <p className="text-xs font-semibold text-brand-800 dark:text-brand-200">{aiResult.type === 'bullets' ? 'Summary (AI)' : 'Expanded (AI)'}</p>
                   {aiResultFromCache && (
-                    <span className="text-xs text-brand-700">Saved</span>
+                    <span className="text-xs text-brand-700 dark:text-brand-300">Saved</span>
                   )}
                   {aiResultFromCache && (
-                    <button type="button" onClick={handleRegenerate} disabled={aiLoading} className="text-xs text-brand-600 hover:text-brand-800 disabled:opacity-50">
+                    <button type="button" onClick={handleRegenerate} disabled={aiLoading} className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-200 disabled:opacity-50">
                       Regenerate
                     </button>
                   )}
                 </div>
-                <p className="text-gray-800 whitespace-pre-wrap text-sm">{aiResult.text}</p>
-                <button type="button" onClick={() => { setAiResult(null); setAiResultFromCache(false); }} className="mt-2 text-xs text-brand-600 hover:text-brand-800">Dismiss</button>
+                <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap text-sm">{aiResult.text}</p>
+                <button type="button" onClick={() => { setAiResult(null); setAiResultFromCache(false); }} className="mt-2 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-200">Dismiss</button>
               </div>
             )}
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-6" style={{ color: courseColor }}>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6" style={{ color: courseColor }}>
               {note.concept}
             </h2>
 
             <div className="space-y-6">
               <section className="space-y-1.5">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">What it is</h3>
-                <p className="text-gray-800 leading-relaxed">{note.smart_note.what_it_is}</p>
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">What it is</h3>
+                <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{note.smart_note.what_it_is}</p>
               </section>
-              <section className="space-y-1.5 pt-2 border-t border-gray-100">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Why it matters</h3>
-                <p className="text-gray-800 leading-relaxed">{note.smart_note.why_it_matters}</p>
+              <section className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-700">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Why it matters</h3>
+                <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{note.smart_note.why_it_matters}</p>
               </section>
-              <section className="space-y-1.5 pt-2 border-t border-gray-100">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+              <section className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-700">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
                   <span aria-hidden>💡</span>
                   Common confusion
                 </h3>
-                <p className="text-amber-900 bg-amber-50 rounded-lg px-4 py-3 text-sm leading-relaxed border border-amber-200/80">
+                <p className="text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 rounded-lg px-4 py-3 text-sm leading-relaxed border border-amber-200/80 dark:border-amber-800">
                   {note.smart_note.common_confusion}
                 </p>
               </section>
-              <div className="pt-4 border-t border-gray-100 space-y-2">
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={toggleFlagged}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flagged ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flagged ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800' : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                     aria-pressed={flagged}
                   >
                     <span aria-hidden>{flagged ? '📌' : '📌'}</span>
@@ -366,7 +366,7 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
                   <button
                     type="button"
                     onClick={confused ? toggleConfused : handleAskTutorConfused}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${confused ? 'bg-red-50 text-red-800 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'}`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${confused ? 'bg-red-50 dark:bg-red-900/40 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                     aria-pressed={confused}
                   >
                     <span aria-hidden>?</span>
@@ -389,7 +389,7 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
       )}
 
       {!note && topicName && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-500 text-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
           No note for this topic yet. Pick another topic or try a different context.
         </div>
       )}

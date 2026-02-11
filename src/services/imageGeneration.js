@@ -48,7 +48,7 @@ export async function generateMnemonicImage(prompt, onStatus) {
 
   // Principle-based scope at send time (global for all picmonics)
   const scopeReinforcement =
-    ' Draw only the main character and supporting elements explicitly listed in the prompt; nothing else. Do not add any other characters, environments, props, furniture, equipment, or decorative objects. No text, words, letters, or numbers anywhere in the image. Purely visual only.';
+    ' Draw only the main character and supporting elements explicitly listed; nothing else. Empty, minimal background. No furniture (tables, chairs, desks). No extra props, doors, walls, or room clutter. No text, words, letters, or numbers anywhere. Purely visual only.';
   const finalPrompt = (prompt + scopeReinforcement).slice(0, 4000);
 
   const body = {

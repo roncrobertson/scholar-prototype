@@ -38,6 +38,14 @@ const FORBIDDEN_PHRASES = [
   /(second|extra)\s+person/gi,
   /dna\s*(helix|double\s*helix|structure)/gi,
   /clock(s)?\s*on\s*the\s*wall/gi,
+  // Room/sign text (observed in Cell Membrane output)
+  /\b(room|door)\s*numbers?\b/gi,
+  /\b\d{3}\s*(bio|alien|room|lab)\b/gi,
+  // Furniture/clutter (reduce orphan visuals)
+  /\b(wooden\s+)?table\s*(with|and)\s*(chair|wastebasket)?/gi,
+  /\bwastebasket\b/gi,
+  /\bchairs?\s*(and|or)\s*tables?\b/gi,
+  /\bdesks?\s*(with|and)/gi,
 ];
 
 /**

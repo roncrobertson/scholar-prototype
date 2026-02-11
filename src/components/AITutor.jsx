@@ -4,13 +4,13 @@ import { getApiKeyMessage, hasOpenAIKey } from '../utils/aiCapability';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 
-/** Learning-science system prompt: retrieval-friendly, concise, Socratic, suggests Picmonics/Flashcards. */
+/** Learning-science system prompt: retrieval-friendly, concise, Socratic, suggests Flashcards. */
 function buildSystemPrompt(courseContext) {
   const base = [
     'You are a warm, expert academic tutor. Your goal is to help the student understand and remember.',
     'Be concise by default (2–4 sentences). If they want more depth, they can ask "go deeper" or "explain more."',
     'Use retrieval-friendly language: "One way to remember this is…", "For the exam, focus on…", "A key takeaway:…"',
-    'When relevant, suggest next steps: "Try the Picmonic for [topic]" or "Practice with flashcards on this."',
+    'When relevant, suggest next steps: "Practice with flashcards on this" or "Try the Smart Notes summary."',
     'Ask short guiding questions when it helps (Socratic): "What do you think happens when…?"',
     'No preamble like "Here is…" or "Sure!"—jump straight to the content.',
   ].join(' ');
@@ -134,7 +134,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
     setHasLoadedFromStorage(true);
   }, [course?.id]);
 
-  // When conceptContext is set (e.g. from "Explain this" in Picmonics), auto-send one question and consume context
+  // When conceptContext is set (e.g. from "Explain this" in Smart Notes), auto-send one question and consume context
   useEffect(() => {
     if (!conceptContext?.conceptName) {
       conceptContextSent.current = false;
@@ -275,27 +275,27 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
   const showSuggestedPrompts = isEmpty && !loadingOpener;
 
   return (
-    <div className="fade-in flex flex-col h-[min(75vh,700px)] bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+    <div className="fade-in flex flex-col h-[min(75vh,700px)] bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
         <div className="flex items-center gap-3 min-w-0">
-          <StudyAideIcon aideId="tutor" className="w-8 h-8 shrink-0 text-gray-700" />
+          <StudyAideIcon aideId="tutor" className="w-8 h-8 shrink-0 text-gray-700 dark:text-gray-300" />
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-gray-900">AI Tutor</h1>
-            <p className="text-xs text-gray-500 truncate">{courseLabel} • Ask anything</p>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">AI Tutor</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{courseLabel} • Ask anything</p>
           </div>
         </div>
         <button
           type="button"
           onClick={handleNewChat}
-          className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+          className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
           New chat
         </button>
         <button
           type="button"
           onClick={() => setShowRememberInput((v) => !v)}
-          className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           title="Add context for this session (e.g. I'm focusing on cell membrane)"
         >
           Remember this
@@ -304,24 +304,24 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
 
       {/* Session memory: "Remember this" (Phase 5.2) */}
       {showRememberInput && (
-        <div className="px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+        <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex items-center gap-2">
           <input
             type="text"
             value={sessionMemory}
             onChange={(e) => setSessionMemory(e.target.value)}
             placeholder="e.g. I'm focusing on cell membrane"
-            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
             onKeyDown={(e) => e.key === 'Escape' && setShowRememberInput(false)}
           />
-          <button type="button" onClick={() => setShowRememberInput(false)} className="text-xs text-gray-500 hover:text-gray-700">Done</button>
+          <button type="button" onClick={() => setShowRememberInput(false)} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Done</button>
         </div>
       )}
 
       {/* One-time onboarding tip (Phase 4.3) */}
       {showOnboardingTip && (
-        <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-gray-100 bg-brand-50/30 text-sm text-brand-900">
+        <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-brand-50/30 dark:bg-brand-900/30 text-sm text-brand-900 dark:text-brand-200">
           <p className="flex-1">
-            <span className="font-medium">Tip:</span> Ask anything about your course. I&apos;ll help you understand and remember—and suggest Picmonics or flashcards when it helps.
+            <span className="font-medium">Tip:</span> Ask anything about your course. I&apos;ll help you understand and remember—and suggest flashcards when it helps.
           </p>
           <button
             type="button"
@@ -331,7 +331,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
                 localStorage.setItem('scholar-onboarding-tutor', '1');
               } catch (_) {}
             }}
-            className="shrink-0 rounded px-2 py-1 text-brand-700 hover:bg-brand-100 font-medium"
+            className="shrink-0 rounded px-2 py-1 text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-800/50 font-medium"
             aria-label="Dismiss tip"
           >
             Got it
@@ -343,17 +343,17 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {loadingOpener && (
           <div className="flex gap-3">
-            <span className="shrink-0 w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600" aria-hidden>
+            <span className="shrink-0 w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400" aria-hidden>
               <StudyAideIcon aideId="tutor" className="w-5 h-5" />
             </span>
-            <div className="rounded-2xl px-4 py-3 bg-gray-50 border border-gray-100 text-gray-500 text-sm shadow-sm max-w-[85%]">
+            <div className="rounded-2xl px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm shadow-sm max-w-[85%]">
               Thinking of what to focus on today…
             </div>
           </div>
         )}
 
         {openerError && !loadingOpener && isEmpty && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex flex-wrap items-center justify-between gap-2">
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
             <span>{openerError}</span>
             <button
               type="button"
@@ -361,7 +361,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
                 openerRequested.current = false;
                 fetchOpener();
               }}
-              className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 font-medium hover:bg-amber-200"
+              className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-800/50 text-amber-800 dark:text-amber-200 font-medium hover:bg-amber-200 dark:hover:bg-amber-700"
             >
               Retry
             </button>
@@ -369,7 +369,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
         )}
 
         {!loadingOpener && isEmpty && !openerError && (
-          <p className="text-sm text-gray-500 text-center py-6 px-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6 px-4">
             Ask a question about your course or any topic. I&apos;ll help you understand and remember.
           </p>
         )}
@@ -381,7 +381,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
           >
             {m.role === 'assistant' && (
               <span
-                className="shrink-0 w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600"
+                className="shrink-0 w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400"
                 aria-hidden
               >
                 <StudyAideIcon aideId="tutor" className="w-5 h-5" />
@@ -391,11 +391,11 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
                 m.role === 'user'
                   ? 'bg-brand-600 text-white ml-auto'
-                  : 'bg-gray-50 text-gray-800 border border-gray-100'
+                  : 'bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-600'
               }`}
             >
               {m.role === 'assistant' && (
-                <p className="text-xs font-medium text-gray-500 mb-1.5">Tutor</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Tutor</p>
               )}
               <p className="whitespace-pre-wrap">{m.content}</p>
             </div>
@@ -404,10 +404,10 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
 
         {loading && (
           <div className="flex gap-3">
-            <span className="shrink-0 w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600" aria-hidden>
+            <span className="shrink-0 w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400" aria-hidden>
               <StudyAideIcon aideId="tutor" className="w-5 h-5" />
             </span>
-            <div className="rounded-2xl px-4 py-3 bg-gray-50 border border-gray-100 text-gray-500 text-sm shadow-sm">
+            <div className="rounded-2xl px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm shadow-sm">
               Thinking…
             </div>
           </div>
@@ -418,7 +418,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
       {/* Suggested prompts (empty state) */}
       {showSuggestedPrompts && (
         <div className="px-4 pb-2">
-          <p className="text-xs font-medium text-gray-500 mb-2">Try asking:</p>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Try asking:</p>
           <div className="flex flex-wrap gap-2">
             {SUGGESTED_PROMPTS.map((prompt, i) => (
               <button
@@ -426,7 +426,7 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
                 type="button"
                 onClick={() => sendMessage(prompt)}
                 disabled={loading}
-                className="px-3 py-2 rounded-xl text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 transition-colors disabled:opacity-50"
+                className="px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors disabled:opacity-50"
               >
                 {prompt}
               </button>
@@ -436,20 +436,20 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
       )}
 
       {error && (
-        <p className="px-4 py-2 text-sm text-red-600 bg-red-50 border-t border-red-100">{error}</p>
+        <p className="px-4 py-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-t border-red-100 dark:border-red-800">{error}</p>
       )}
 
       {/* Optional quick prompts when thread has messages */}
       {!isEmpty && messages.length > 0 && (
         <div className="px-4 pb-1 flex flex-wrap gap-2">
-          <span className="text-xs text-gray-500 self-center">Try:</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 self-center">Try:</span>
           {['Explain in simple terms', 'Quiz me', 'Key takeaway?'].map((prompt, i) => (
             <button
               key={i}
               type="button"
               onClick={() => sendMessage(prompt)}
               disabled={loading}
-              className="px-2.5 py-1 rounded-lg text-xs text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+              className="px-2.5 py-1 rounded-lg text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -458,14 +458,14 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
+      <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
         <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask a question…"
-            className="flex-1 min-h-[44px] max-h-32 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm resize-y focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
+            className="flex-1 min-h-[44px] max-h-32 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
             rows={1}
             disabled={loading}
           />

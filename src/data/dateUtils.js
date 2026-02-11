@@ -11,6 +11,14 @@ export function formatToday() {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
+/** Time-based greeting: morning (before 12), afternoon (before 17), evening. */
+export function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export function getWeekRange() {
   const d = new Date();
   const day = d.getDay();

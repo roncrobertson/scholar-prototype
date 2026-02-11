@@ -10,8 +10,8 @@ export function AllCoursesScreen({ onShowStudyAides, onSelectCourse }) {
     <div className="fade-in space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Courses</h1>
-          <p className="text-gray-500">Spring 2026 • {courses.length} courses</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">All Courses</h1>
+          <p className="text-gray-500 dark:text-gray-400">Spring 2026 • {courses.length} courses</p>
         </div>
         <button
           onClick={() => onShowStudyAides({})}
@@ -23,21 +23,21 @@ export function AllCoursesScreen({ onShowStudyAides, onSelectCourse }) {
 
       {/* Overall Stats */}
       <div className="grid grid-cols-4 gap-4 stagger-children">
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <p className="text-2xl font-bold text-gray-900">3.2</p>
-          <p className="text-sm text-gray-500">Current GPA</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">3.2</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Current GPA</p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <p className="text-2xl font-bold text-green-600">3</p>
-          <p className="text-sm text-gray-500">On target</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">3</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">On target</p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <p className="text-2xl font-bold text-amber-600">1</p>
-          <p className="text-sm text-gray-500">Needs focus</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">1</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Needs focus</p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <p className="text-2xl font-bold text-brand-600">21</p>
-          <p className="text-sm text-gray-500">Recoverable pts</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+          <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">21</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Recoverable pts</p>
         </div>
       </div>
 
@@ -48,23 +48,23 @@ export function AllCoursesScreen({ onShowStudyAides, onSelectCourse }) {
           return (
             <div
               key={course.id}
-              className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-all cursor-pointer"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 dark:hover:border-gray-600 transition-all cursor-pointer"
               onClick={() => onSelectCourse(course)}
             >
               <div className="h-1" style={{ backgroundColor: course.color }} />
               <div className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       {course.code}: {course.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       {course.instructor.name} • {course.schedule}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900">{course.grade}%</p>
-                    <p className={`text-sm ${onTrack ? 'text-green-600' : 'text-amber-600'}`}>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{course.grade}%</p>
+                    <p className={`text-sm ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
                       {onTrack ? '✓ On track' : `${course.target - course.grade}% to go`}
                     </p>
                   </div>
@@ -89,18 +89,18 @@ export function AllCoursesScreen({ onShowStudyAides, onSelectCourse }) {
                 <div className="mt-4 flex gap-2">
                   <button
                     onClick={e => { e.stopPropagation(); onShowStudyAides(course); }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-700 rounded-lg text-sm font-medium hover:bg-brand-100 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded-lg text-sm font-medium hover:bg-brand-100 dark:hover:bg-brand-800/50 transition-colors"
                   >
                     <LayoutGrid className="w-3.5 h-3.5" aria-hidden />
                     Study
                   </button>
                   {course.missingWork.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-sm">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
                       <AlertTriangle className="w-3.5 h-3.5" aria-hidden />
                       {course.missingWork.length} missing
                     </span>
                   )}
-                  <span className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-sm">
+                  <span className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-sm">
                     Next: {course.nextClass}
                   </span>
                 </div>

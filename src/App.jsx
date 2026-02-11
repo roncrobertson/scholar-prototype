@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useViewTransitionNavigate } from './hooks/useViewTransitionNavigate';
 import { DesktopNav, MobileNav } from './components/Navigation';
 import { StudyAideLauncher } from './components/StudyAideLauncher';
 import { StudyModeSwitcher } from './components/StudyModeSwitcher';
@@ -14,7 +13,6 @@ import {
 import { getCourseById } from './data/courses';
 import { getRecommendedConceptIds } from './data/questions';
 import { studyAides } from './data/student';
-import { picmonicsBank } from './data/picmonics';
 import { getDueCount } from './utils/studyStats';
 
 // Lazy-loaded screens (Timeline, Recovery, Social — less frequently used)
@@ -26,7 +24,6 @@ const SocialScreen = lazy(() => import('./components/screens/SocialScreen'));
 const StudySessionPlaceholder = lazy(() => import('./components/StudySessionPlaceholder'));
 const Flashcards = lazy(() => import('./components/Flashcards'));
 const PracticeSession = lazy(() => import('./components/PracticeSession'));
-const Picmonics = lazy(() => import('./components/Picmonics'));
 const SmartNotes = lazy(() => import('./components/SmartNotes'));
 const AITutor = lazy(() => import('./components/AITutor'));
 
@@ -40,7 +37,7 @@ const AITutor = lazy(() => import('./components/AITutor'));
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const navigateWithTransition = useViewTransitionNavigate();
+  const navigateWithTransition = navigate;
 
   // Derive screen + selectedCourse from URL (so back button and links work)
   const { screen, selectedCourse } = useMemo(() => {
@@ -59,8 +56,16 @@ function App() {
     return { screen: 'home', selectedCourse: null };
   }, [location.pathname]);
 
-  // UI state
-  const [isMobile, setIsMobile] = useState(false);
+  // UI state — isMobile from viewport (matchMedia), not manual toggle
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 768px)');
+    const set = () => setIsMobile(mql.matches);
+    mql.addEventListener('change', set);
+    return () => mql.removeEventListener('change', set);
+  }, []);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showStudyAides, setShowStudyAides] = useState(false);
   const [activeStudySession, setActiveStudySession] = useState(null);
@@ -92,7 +97,7 @@ function App() {
     setShowStudyAides(course);
   };
 
-  /** Start a study session directly by aide id (e.g. from Flashcards/Picmonics/Practice Test button). */
+  /** Start a study session directly by aide id (e.g. from Flashcards/Practice Test button). */
   const handleStartStudyAide = (aideId, course) => {
     const aide = studyAides.find((a) => a.id === aideId);
     if (aide) handleStartStudySession(aide, course);
@@ -124,7 +129,7 @@ function App() {
     if (!getHasSeenWelcome()) setShowWelcome(true);
   }, []);
 
-  /** Switch to AI Tutor with concept pre-loaded (from Picmonics/Smart Notes "Explain this"). */
+  /** Switch to AI Tutor with concept pre-loaded (from Smart Notes "Explain this"). */
   const handleAskTutor = (context) => {
     setTutorContext(context || null);
     const aide = studyAides.find((a) => a.id === 'tutor');
@@ -163,15 +168,6 @@ function App() {
             course={course}
             onExit={handleExitStudySession}
             sessionOptions={activeStudySession.sessionOptions}
-          />
-        );
-      }
-      if (aide?.id === 'picmonics') {
-        return (
-          <Picmonics
-            course={course}
-            onExit={handleExitStudySession}
-            onAskTutor={handleAskTutor}
           />
         );
       }
@@ -251,29 +247,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-gray-50 to-white ${isMobile ? 'pb-20' : ''}`}>
-      {/* Device Toggle: only in dev for layout prototyping */}
-      {import.meta.env.DEV && (
-        <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-1 flex gap-1">
-          <button
-            onClick={() => setIsMobile(false)}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              !isMobile ? 'bg-brand-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Desktop
-          </button>
-          <button
-            onClick={() => setIsMobile(true)}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              isMobile ? 'bg-brand-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Mobile
-          </button>
-        </div>
-      )}
-
+    <div className={`min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ${isMobile ? 'pb-20' : ''}`}>
       {/* Navigation */}
       {isMobile ? (
         <MobileNav
@@ -293,15 +267,15 @@ function App() {
         />
       )}
 
-      {/* Main Content — wider for Picmonics; ml uses --sidebar-width for collapsible nav */}
+      {/* Main Content — ml uses --sidebar-width for collapsible nav */}
       <main className={`
         ${isMobile ? 'pt-16 px-4 pb-24' : 'ml-[var(--sidebar-width)] p-8 transition-[margin] duration-200'} 
-        ${isMobile ? 'max-w-md mx-auto' : activeStudySession?.aide?.id === 'picmonics' ? 'max-w-[90rem]' : 'max-w-4xl'}
+        ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'}
       `}>
         {/* Retrieval summary after exiting a study session (Phase 3.4) */}
         {exitSummary && !activeStudySession && (
           <div
-            className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+            className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 px-4 py-3 text-sm text-green-800 dark:text-green-200"
             role="status"
             aria-live="polite"
           >
@@ -311,7 +285,7 @@ function App() {
             <button
               type="button"
               onClick={() => setExitSummary(null)}
-              className="shrink-0 rounded-lg px-2 py-1 text-green-700 hover:bg-green-100"
+              className="shrink-0 rounded-lg px-2 py-1 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/50"
               aria-label="Dismiss"
             >
               Dismiss
@@ -331,8 +305,8 @@ function App() {
         )}
         <Suspense
           fallback={
-            <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-gray-100 bg-gray-50/50 py-12" aria-busy="true">
-              <span className="text-sm text-gray-500">Loading…</span>
+            <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 py-12" aria-busy="true">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Loading…</span>
             </div>
           }
         >
@@ -353,6 +327,7 @@ function App() {
       {showWelcome && (
         <OnboardingWelcome onDismiss={() => setShowWelcome(false)} />
       )}
+
     </div>
   );
 }

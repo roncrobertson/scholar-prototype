@@ -59,6 +59,7 @@ export function addPostImageRecord(payload) {
     image_url: payload.image_url || '',
     generated_at: new Date().toISOString(),
     outcome: null,
+    validation: null,
     render: {
       mode: 'image-gen',
       prompt_snippet: (payload.prompt || '').slice(0, 300),
@@ -68,6 +69,21 @@ export function addPostImageRecord(payload) {
   records.push(record);
   saveToStorage();
   return id;
+}
+
+/**
+ * Store automated validation result for a post-image record (CHECK_10, 11, 12).
+ * @param {string} id - From addPostImageRecord
+ * @param {object} validation - { check10, check11, check12, overallPass, details? }
+ */
+export function updatePostImageValidation(id, validation) {
+  ensureLoaded();
+  const r = records.find((x) => x.id === id);
+  if (r) {
+    r.validation = validation;
+    r.validation_at = new Date().toISOString();
+    saveToStorage();
+  }
 }
 
 /**
@@ -83,6 +99,16 @@ export function recordPostImageOutcome(id, outcome) {
     r.outcome_at = new Date().toISOString();
     saveToStorage();
   }
+}
+
+/**
+ * Get a single record by id (includes validation if present).
+ * @param {string} id
+ * @returns {object|null}
+ */
+export function getPostImageRecord(id) {
+  ensureLoaded();
+  return records.find((x) => x.id === id) ?? null;
 }
 
 /**

@@ -5,7 +5,7 @@
  * Library-first: when symbolLibrary has a match for the attribute type, use its visual_description.
  */
 
-import { getSymbolFromLibrary } from './symbolLibrary';
+import { getSymbolForAttribute } from './symbolLibrary';
 
 const ATTRIBUTE_TO_SYMBOL = {
   // Mechanism / process
@@ -98,8 +98,8 @@ export function buildSymbolMap(attributes, zoneOrder = {}) {
       zoneOrder[attr.type] ?? DEFAULT_ZONE_BY_TYPE[attr.type] ?? defaultZones[zoneIndex % defaultZones.length];
     zoneIndex += 1;
     const customVisual = (attr.visual_mnemonic || '').trim();
-    // Library first: use global symbol library when available (Master Doc: consistency, transfer)
-    const lib = getSymbolFromLibrary(attr.type);
+    // Library first: value-level then type-level (Master Doc: consistency, transfer)
+    const lib = getSymbolForAttribute(attr.type, attr.value);
     const symbolFromLibrary = lib?.visual_description ?? null;
     const symbol = customVisual || symbolFromLibrary || attributeToSymbol(attr.type, attr.value);
     return {

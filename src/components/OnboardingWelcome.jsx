@@ -18,7 +18,7 @@ export function setHasSeenWelcome() {
 }
 
 /**
- * One-time welcome modal: "What Scholar does" — study with AI Tutor, Picmonics, practice.
+ * One-time welcome modal: "What Scholar does" — study with AI Tutor, Smart Notes, flashcards, practice.
  * Focus trap: focus stays inside until dismissed; Escape dismisses.
  */
 export function OnboardingWelcome({ onDismiss }) {
@@ -61,9 +61,8 @@ export function OnboardingWelcome({ onDismiss }) {
   const features = [
     { aideId: 'tutor', name: 'AI Tutor', desc: 'Ask anything about your course; get explanations and practice ideas.' },
     { aideId: 'summary', name: 'Smart Notes', desc: 'AI-generated summaries; expand or condense concepts.' },
-    { aideId: 'picmonics', name: 'Picmonics', desc: 'Turn concepts into memorable images; generate an image to encode what you need to remember.' },
-    { aideId: 'practice', name: 'Practice', desc: 'Quiz yourself; generate more questions with AI.' },
     { aideId: 'flashcards', name: 'Flashcards', desc: 'Spaced repetition cards — switch modes anytime without leaving your session.' },
+    { aideId: 'practice', name: 'Practice', desc: 'Quiz yourself; generate more questions with AI.' },
   ];
 
   return (
@@ -75,14 +74,14 @@ export function OnboardingWelcome({ onDismiss }) {
     >
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 dark:border-gray-700"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
-          <h2 id="onboarding-title" className="text-2xl font-bold text-gray-900 mb-1">
+          <h2 id="onboarding-title" className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             Welcome to Scholar
           </h2>
-          <p className="text-gray-600 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
             Your AI-powered study buddy. Pick a course, then choose how to study:
           </p>
         </div>
@@ -91,12 +90,12 @@ export function OnboardingWelcome({ onDismiss }) {
         <ul className="px-6 pb-4 space-y-3">
           {features.map(({ aideId, name, desc }) => (
             <li key={name} className="flex gap-3">
-              <div className="shrink-0 w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center">
-                <StudyAideIcon aideId={aideId} className="w-5 h-5 text-brand-600" />
+              <div className="shrink-0 w-9 h-9 rounded-lg bg-brand-50 dark:bg-brand-900/40 flex items-center justify-center">
+                <StudyAideIcon aideId={aideId} className="w-5 h-5 text-brand-600 dark:text-brand-400" />
               </div>
               <div className="min-w-0">
-                <strong className="text-gray-900 block text-sm">{name}</strong>
-                <p className="text-sm text-gray-600 leading-snug mt-0.5">{desc}</p>
+                <strong className="text-gray-900 dark:text-gray-100 block text-sm">{name}</strong>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-snug mt-0.5">{desc}</p>
               </div>
             </li>
           ))}
@@ -104,7 +103,7 @@ export function OnboardingWelcome({ onDismiss }) {
 
         {/* Footer */}
         <div className="px-6 pb-6 pt-2">
-          <p className="text-xs text-gray-500 leading-relaxed mb-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
             When you exit a session, we’ll remind you how many concepts are due for review so you can space your learning.
           </p>
           <button
