@@ -580,42 +580,39 @@ export function Flashcards({ course, onExit }) {
         </button>
       </div>
 
-      {/* Read aloud — outside card, reads current side */}
+      {/* Read aloud — minimal icon button */}
       {canReadAloud && (
         <div className="flex justify-center">
           <button
             type="button"
             onClick={handleReadAloud}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            className="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Read aloud"
+            title="Listen"
           >
-            <span className="text-base" aria-hidden>🔊</span>
-            Listen
+            <span className="text-lg" aria-hidden>🔊</span>
           </button>
         </div>
       )}
 
       {/* Rate (only when flipped) */}
       {isFlipped && (
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex gap-3 justify-center">
-            <button
-              ref={gotItButtonRef}
-              type="button"
-              onClick={() => handleRate(false)}
-              className="px-5 py-2.5 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-xl font-medium hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors"
-            >
-              Got it
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRate(true)}
-              className="px-5 py-2.5 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-xl font-medium hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors"
-            >
-              Study again
-            </button>
-          </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Press <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">1</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">G</kbd> for Got it, <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">2</kbd> or <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-[10px]">S</kbd> for Study again</p>
+        <div className="flex gap-3 justify-center">
+          <button
+            ref={gotItButtonRef}
+            type="button"
+            onClick={() => handleRate(false)}
+            className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-sm"
+          >
+            Got it
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRate(true)}
+            className="px-6 py-3 bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 transition-colors shadow-sm"
+          >
+            Study again
+          </button>
         </div>
       )}
 
