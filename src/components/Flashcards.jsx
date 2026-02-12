@@ -560,8 +560,8 @@ export function Flashcards({ course, onExit }) {
               className="flashcard-face rounded-2xl shadow-sm hover:border-gray-200 dark:hover:border-gray-500 transition-colors"
               style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
             >
-              <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{frontLabel}</p>
-              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed px-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{frontLabel}</p>
+              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
                 {displayFront}
               </p>
               <p className="text-sm text-brand-600 dark:text-brand-400 mt-4">Tap to flip</p>
@@ -570,8 +570,8 @@ export function Flashcards({ course, onExit }) {
               className="flashcard-face back rounded-2xl shadow-sm hover:border-gray-200 dark:hover:border-gray-500 transition-colors"
               style={{ borderTopColor: courseColor, borderTopWidth: 4 }}
             >
-              <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{backLabel}</p>
-              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 leading-relaxed px-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{backLabel}</p>
+              <p className="text-lg font-medium text-gray-900 leading-relaxed px-2">
                 {displayBack}
               </p>
               <p className="text-sm text-brand-600 dark:text-brand-400 mt-4">Tap to flip</p>
