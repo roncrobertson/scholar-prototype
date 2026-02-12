@@ -580,21 +580,6 @@ export function Flashcards({ course, onExit }) {
         </button>
       </div>
 
-      {/* Read aloud — minimal icon button */}
-      {canReadAloud && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={handleReadAloud}
-            className="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Read aloud"
-            title="Listen"
-          >
-            <span className="text-lg" aria-hidden>🔊</span>
-          </button>
-        </div>
-      )}
-
       {/* Rate (only when flipped) */}
       {isFlipped && (
         <div className="flex gap-3 justify-center">
