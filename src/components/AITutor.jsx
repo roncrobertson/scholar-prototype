@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { StudyAideIcon } from '../utils/studyAideIcons';
 import { getApiKeyMessage, hasOpenAIKey } from '../utils/aiCapability';
+import { detectTutorActionIntents } from '../utils/studyFlowRecommendations';
+import { getSmartNote, getTopicsWithNotes } from '../data/smartNotes';
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -98,10 +100,11 @@ const SUGGESTED_PROMPTS = [
 /**
  * AI Tutor — chat UI with OpenAI, persistence, opener, suggested prompts, and course context.
  */
-export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
+export function AITutor({ course, onExit, conceptContext, onContextConsumed, onStartStudyAide }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [detectedConcepts, setDetectedConcepts] = useState({});
   const [loadingOpener, setLoadingOpener] = useState(false);
   const [openerError, setOpenerError] = useState(null);
   const [error, setError] = useState(null);
@@ -121,6 +124,19 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
   const courseLabel = course?.code || 'All Courses';
   const courseContext = buildCourseContext(course, conceptContext, sessionMemory);
   const systemPrompt = buildSystemPrompt(courseContext);
+
+  // Helper to detect concept mentions in messages
+  const detectConceptInMessage = (message, course) => {
+    if (!course?.masteryTopics) return null;
+    const lowerMessage = message.toLowerCase();
+    for (const topic of course.masteryTopics) {
+      if (lowerMessage.includes(topic.name.toLowerCase())) {
+        const note = getSmartNote(course, topic.name, 'exam');
+        if (note) return { topic: topic.name, note };
+      }
+    }
+    return null;
+  };
 
   const scrollToBottom = useCallback(() => {
     listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -241,7 +257,19 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
       }
 
       const assistantContent = data.choices?.[0]?.message?.content?.trim() || 'No response.';
-      const next = [...messages, userMessage, { role: 'assistant', content: assistantContent }];
+      
+      // Detect concept mentions for visual references
+      const detectedConcept = detectConceptInMessage(assistantContent, course);
+      if (detectedConcept) {
+        setDetectedConcepts(prev => ({ ...prev, [messages.length + 1]: detectedConcept }));
+      }
+      
+      const assistantMessage = { 
+        role: 'assistant', 
+        content: assistantContent,
+        actions: detectTutorActionIntents(assistantContent)
+      };
+      const next = [...messages, userMessage, assistantMessage];
       setMessages(next);
       saveMessages(course, next);
     } catch (err) {
@@ -375,29 +403,79 @@ export function AITutor({ course, onExit, conceptContext, onContextConsumed }) {
         )}
 
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}
-          >
-            {m.role === 'assistant' && (
-              <span
-                className="shrink-0 w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400"
-                aria-hidden
-              >
-                <StudyAideIcon aideId="tutor" className="w-5 h-5" />
-              </span>
-            )}
+          <div key={i}>
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
-                m.role === 'user'
-                  ? 'bg-brand-600 text-white ml-auto'
-                  : 'bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-600'
-              }`}
+              className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
               {m.role === 'assistant' && (
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Tutor</p>
+                <span
+                  className="shrink-0 w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400"
+                  aria-hidden
+                >
+                  <StudyAideIcon aideId="tutor" className="w-5 h-5" />
+                </span>
               )}
-              <p className="whitespace-pre-wrap">{m.content}</p>
+              <div className="flex-1 max-w-[85%]">
+                <div
+                  className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
+                    m.role === 'user'
+                      ? 'bg-brand-600 text-white ml-auto'
+                      : 'bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-600'
+                  }`}
+                >
+                  {m.role === 'assistant' && (
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Tutor</p>
+                  )}
+                  <p className="whitespace-pre-wrap">{m.content}</p>
+                </div>
+                
+                {/* Visual reference (Smart Note preview) */}
+                {m.role === 'assistant' && detectedConcepts[i] && (
+                  <div className="mt-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-start gap-2 mb-2">
+                      <span className="text-lg" aria-hidden>📋</span>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                          {detectedConcepts[i].topic}
+                        </h4>
+                        <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 line-clamp-2">
+                          {detectedConcepts[i].note.smart_note.what_it_is}
+                        </p>
+                      </div>
+                    </div>
+                    {typeof onStartStudyAide === 'function' && (
+                      <button
+                        type="button"
+                        onClick={() => onStartStudyAide('summary', course)}
+                        className="text-xs font-medium text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100"
+                      >
+                        View full note →
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Action buttons below assistant messages */}
+                {m.role === 'assistant' && m.actions && m.actions.length > 0 && typeof onStartStudyAide === 'function' && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {m.actions.map((action, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          if (action.type === 'flashcards') onStartStudyAide('flashcards', course);
+                          else if (action.type === 'practice') onStartStudyAide('practice', course);
+                          else if (action.type === 'smart-notes') onStartStudyAide('summary', course);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-colors shadow-sm"
+                      >
+                        <span aria-hidden>{action.icon}</span>
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}

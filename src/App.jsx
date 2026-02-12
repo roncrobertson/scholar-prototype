@@ -168,6 +168,7 @@ function App() {
             course={course}
             onExit={handleExitStudySession}
             sessionOptions={activeStudySession.sessionOptions}
+            onStartStudyAide={handleStartStudyAide}
           />
         );
       }
@@ -178,6 +179,7 @@ function App() {
             onExit={handleExitStudySession}
             conceptContext={tutorContext}
             onContextConsumed={() => setTutorContext(null)}
+            onStartStudyAide={handleStartStudyAide}
           />
         );
       }

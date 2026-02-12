@@ -12,6 +12,7 @@ import {
 } from '../data/flashcards';
 import { recordStudied, advanceInterval, getDueForReview } from '../services/spacedReview';
 import { recordStudyActivity } from '../utils/studyStats';
+import { loadGeneratedFlashcards } from '../services/flashcardGenerator';
 
 /**
  * Flashcards - Core study flow: flip, rate (Got it / Study again), progress, review missed, session summary.
@@ -30,11 +31,21 @@ export function Flashcards({ course, onExit }) {
   const [showSummary, setShowSummary] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [persistedStudyAgainCount, setPersistedStudyAgainCount] = useState(0);
+  const [showGoalPicker, setShowGoalPicker] = useState(true);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
   const rateHandlerRef = useRef(() => {});
   const cardButtonRef = useRef(null);
   const gotItButtonRef = useRef(null);
 
   const key = courseKey(course);
+
+  // Session goals
+  const GOALS = [
+    { id: 'quick', label: 'Quick review', cards: 10, time: 5, emoji: '⚡' },
+    { id: 'standard', label: 'Standard session', cards: 20, time: 10, emoji: '📚' },
+    { id: 'deep', label: 'Deep practice', cards: 50, time: 25, emoji: '🎯' }
+  ];
 
   /** Card IDs due for spaced review (this course or all). */
   const dueEntries = React.useMemo(
@@ -52,8 +63,15 @@ export function Flashcards({ course, onExit }) {
     cards.length === dueCardIds.length;
 
   const loadDeck = useCallback(
-    (cardIds = null) => {
+    (cardIds = null, limitToGoal = false) => {
       let deck = getCardsForCourse(course);
+      
+      // Merge with AI-generated flashcards
+      if (course?.id) {
+        const generatedCards = loadGeneratedFlashcards(course.id);
+        deck = [...deck, ...generatedCards];
+      }
+      
       if (cardIds && cardIds.length > 0) {
         const idSet = new Set(cardIds);
         deck = deck.filter((c) => idSet.has(c.id));
@@ -62,6 +80,12 @@ export function Flashcards({ course, onExit }) {
       } else {
         setStudyAgainIds(new Set());
       }
+      
+      // Limit deck size based on goal
+      if (limitToGoal && selectedGoal) {
+        deck = deck.slice(0, selectedGoal.cards);
+      }
+      
       setTotalRated(0);
       const shuffled = shuffleCards(deck);
       setCards(shuffled);
@@ -70,8 +94,9 @@ export function Flashcards({ course, onExit }) {
       setRoundComplete(false);
       setShowSummary(false);
       setPersistedStudyAgainCount(getStudyAgainPersisted(key).length);
+      setSessionStartTime(Date.now());
     },
-    [course, key]
+    [course, key, selectedGoal]
   );
 
   useEffect(() => {
@@ -227,6 +252,67 @@ export function Flashcards({ course, onExit }) {
     setTouchStartX(null);
   };
 
+  // Goal picker (first-time or when resetting)
+  if (showGoalPicker && !selectedGoal) {
+    return (
+      <div className="fade-in space-y-6">
+        <div className="flex items-center gap-3">
+          <StudyAideIcon aideId="flashcards" className="w-8 h-8 text-gray-700 dark:text-gray-300 shrink-0" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Flashcards</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{courseLabel}</p>
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Choose your session</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">How long do you want to study?</p>
+          
+          <div className="grid gap-4">
+            {GOALS.map(goal => (
+              <button
+                key={goal.id}
+                onClick={() => {
+                  setSelectedGoal(goal);
+                  setShowGoalPicker(false);
+                  loadDeck(null, true);
+                }}
+                className="text-left p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-brand-500 dark:hover:border-brand-400 hover:bg-brand-50/50 dark:hover:bg-brand-900/20 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="text-4xl" aria-hidden>{goal.emoji}</span>
+                    <div>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-brand-700 dark:group-hover:text-brand-300">
+                        {goal.label}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        ~{goal.cards} cards · {goal.time} minutes
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-2xl text-gray-300 dark:text-gray-600 group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors">
+                    →
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+          
+          <button
+            onClick={() => {
+              setShowGoalPicker(false);
+              loadDeck();
+            }}
+            className="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          >
+            Skip · Study all cards
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Empty deck
   if (cards.length === 0 && !showSummary) {
     return (
@@ -241,11 +327,31 @@ export function Flashcards({ course, onExit }) {
   // Session summary (after Exit or round complete)
   if (showSummary || (roundComplete && cards.length > 0)) {
     const toReview = studyAgainIds.size;
+    const timeElapsed = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 60000) : 0;
+    const goalMet = selectedGoal && totalRated >= selectedGoal.cards;
+    
     return (
       <div className="fade-in bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Session summary</h2>
+        {goalMet && (
+          <div className="mb-4 text-5xl animate-bounce">
+            🎉
+          </div>
+        )}
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          {goalMet ? 'Goal complete!' : 'Session summary'}
+        </h2>
+        
+        {selectedGoal && (
+          <div className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/30 rounded-full border border-green-200 dark:border-green-800">
+            <span className="text-lg" aria-hidden>{selectedGoal.emoji}</span>
+            <span className="text-sm font-medium text-green-800 dark:text-green-200">
+              {selectedGoal.label} · {timeElapsed} min
+            </span>
+          </div>
+        )}
+        
         <p className="text-gray-600 dark:text-gray-300">
-          You reviewed <strong>{cards.length}</strong> card{cards.length !== 1 ? 's' : ''}.
+          You reviewed <strong>{totalRated}</strong> card{totalRated !== 1 ? 's' : ''}.
         </p>
         {toReview > 0 && (
           <>
@@ -255,6 +361,13 @@ export function Flashcards({ course, onExit }) {
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Review these again soon to remember them better.</p>
           </>
         )}
+        
+        {goalMet && (
+          <p className="text-sm text-green-700 dark:text-green-300 mt-3 font-medium">
+            You stayed focused for {timeElapsed} minutes!
+          </p>
+        )}
+        
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           {toReview > 0 && (
             <button

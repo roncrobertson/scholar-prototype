@@ -15,6 +15,7 @@ import { loadSavedResult, saveResult } from '../data/smartNotesAICache';
 import { summarizeInBulletsWithResult, expandToParagraphWithResult } from '../services/smartNotesAI';
 import { getApiKeyMessage, hasOpenAIKey } from '../utils/aiCapability';
 import { useEscapeToExit } from '../hooks/useEscapeToExit';
+import { generateFlashcardsFromNote, saveGeneratedFlashcards } from '../services/flashcardGenerator';
 
 const CONTEXTS = [
   { id: 'exam', label: 'Exam prep' },
@@ -66,6 +67,8 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
   const [aiLastAction, setAiLastAction] = useState(null);
   /** When true, current aiResult was loaded from cache (show "Saved" / "Regenerate"). */
   const [aiResultFromCache, setAiResultFromCache] = useState(false);
+  const [generatingFlashcards, setGeneratingFlashcards] = useState(false);
+  const [flashcardSuccess, setFlashcardSuccess] = useState(null);
   const courseId = course?.id || '';
   const note = topicName ? getSmartNote(course, topicName, context) : null;
 
@@ -175,6 +178,31 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
     if (aiResult?.type === 'bullets') runSummarize();
     else if (aiResult?.type === 'paragraph') runExpand();
   }, [aiResult?.type, runSummarize, runExpand]);
+
+  const handleGenerateFlashcards = useCallback(async () => {
+    if (!hasOpenAIKey()) {
+      setAiError(getApiKeyMessage());
+      setAiLastAction(null);
+      return;
+    }
+    if (!note || !courseId) return;
+    
+    setGeneratingFlashcards(true);
+    setAiError(null);
+    setFlashcardSuccess(null);
+    
+    const result = await generateFlashcardsFromNote(note, courseId);
+    setGeneratingFlashcards(false);
+    
+    if (result.ok && result.cards) {
+      saveGeneratedFlashcards(courseId, result.cards);
+      setFlashcardSuccess(`Created ${result.cards.length} flashcards! Open Flashcards to study them.`);
+      setTimeout(() => setFlashcardSuccess(null), 5000);
+    } else {
+      setAiError(result.error || 'Failed to generate flashcards');
+      setAiLastAction('flashcards');
+    }
+  }, [note, courseId]);
 
   const courseLabel = course?.code || 'All Courses';
   const courseColor = course?.color || '#F59E0B';
@@ -292,24 +320,39 @@ export function SmartNotes({ course, onExit, onAskTutor }) {
                 type="button"
                 onClick={handleExpand}
                 disabled={aiLoading}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/40 hover:bg-brand-100 dark:hover:bg-brand-800/50 border border-brand-200 dark:border-brand-800 transition-colors disabled:opacity-50"
               >
                 Expand (AI)
+              </button>
+              <button
+                type="button"
+                onClick={handleGenerateFlashcards}
+                disabled={generatingFlashcards || aiLoading}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-800/50 border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50"
+              >
+                {generatingFlashcards ? '...' : 'Make flashcards (AI)'}
               </button>
             </div>
             {aiError && (
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <p className="text-sm text-red-600">{aiError}</p>
-                {aiLastAction && (
+                <p className="text-sm text-red-600 dark:text-red-400">{aiError}</p>
+                {aiLastAction && aiLastAction !== 'flashcards' && (
                   <button
                     type="button"
                     onClick={handleRetry}
                     disabled={aiLoading}
-                    className="text-sm font-medium text-brand-700 hover:text-brand-800 disabled:opacity-50"
+                    className="text-sm font-medium text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200 disabled:opacity-50"
                   >
                     Retry
                   </button>
                 )}
+              </div>
+            )}
+            {flashcardSuccess && (
+              <div className="mb-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  ✓ {flashcardSuccess}
+                </p>
               </div>
             )}
             {aiResult && (

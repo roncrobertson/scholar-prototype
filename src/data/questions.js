@@ -5,6 +5,8 @@
  * Prototype: in-memory only; no de-duplication or versioning.
  */
 
+import { loadGeneratedQuestions } from '../services/questionBankGenerator';
+
 export const questionBank = [
   // BIO 201
   {
@@ -375,9 +377,16 @@ export function getRecommendedConceptIds(course, count = 1) {
  */
 export function getQuestionsForSession(course, options = {}) {
   const limit = options.limit ?? 5;
-  const pool = course?.id
+  
+  // Merge static bank with AI-generated questions
+  let pool = course?.id
     ? questionBank.filter((q) => q.course_id === course.id)
     : questionBank;
+  
+  if (course?.id) {
+    const generatedQuestions = loadGeneratedQuestions(course.id);
+    pool = [...pool, ...generatedQuestions];
+  }
 
   if (options.conceptIds?.length) {
     const focused = pool.filter((q) => options.conceptIds.includes(q.concept_id));
