@@ -13,7 +13,9 @@ export function useTheme() {
  */
 export function ThemeProvider({ children }) {
   useLayoutEffect(() => {
-    document.documentElement.setAttribute('class', 'light');
+    // Force light mode
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
     const meta = document.querySelector('meta[name="color-scheme"]');
     if (meta) meta.setAttribute('content', 'light');
   }, []);
